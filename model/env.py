@@ -52,6 +52,7 @@ class Environment(object):
         for i, j in it.product(range(parameters.n_positions), repeat=2):
 
             for c in self.customers:
+
                 field_of_view = c.get_field_of_view()
 
                 see_firm_0 = field_of_view[0] <= i <= field_of_view[1]
@@ -59,8 +60,10 @@ class Environment(object):
 
                 if see_firm_0 and see_firm_1:
                     self.z[i, j, 2] += 1
+
                 elif see_firm_0:
                     self.z[i, j, 0] += 1
+
                 elif see_firm_1:
                     self.z[i, j, 1] += 1
 
@@ -117,6 +120,7 @@ class Environment(object):
                 self.firms[i].sell_x_units(n_customers[i])
 
         else:
+
             firms_idx = np.arange(parameters.n_firms)
             for c in self.customers:
                 field_of_view = c.get_field_of_view()
