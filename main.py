@@ -1,6 +1,14 @@
 import multiprocessing as mlt
+import shutil
 
-import parameters
+
+try:
+    import parameters
+
+except ModuleNotFoundError:
+    shutil.copy("templates/parameters.py", "parameters/parameters.py")
+    import parameters
+
 import model
 import backup
 import analysis
