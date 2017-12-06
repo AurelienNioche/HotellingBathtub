@@ -4,5 +4,7 @@ import backup
 
 if __name__ == "__main__":
 
-    pool_backup = backup.PoolBackup.load("backup_2017-12-06_15-23-57_769814")
-    analysis.analyse_pool(pool_backup=pool_backup)
+    file_name = "backup_2017-12-06_17-33-21_572863"
+    pool_backup = backup.PoolBackup.load(file_name=file_name)
+    analysis.analyse_pool(pool_backup=pool_backup, file_name=file_name)
+    analysis.analyse_stability(pool_backup)

@@ -9,8 +9,8 @@ momentum = 0.01
 temp = 0.01
 
 # This will influence the computation time, but also the robustness of the results
-n_simulations = 60
-t_max = 5000
+n_simulations = 300
+t_max = 3000
 
 # These variables should affect results in an interesting manner
 bot_customers = True

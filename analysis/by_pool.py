@@ -1,9 +1,10 @@
-import numpy as np
+from pylab import plt, np
+import os
+
+analysis_span = 0.33
 
 
-def analyse_pool(pool_backup):
-
-    analysis_span = 0.1
+def analyse_pool(pool_backup, file_name=""):
 
     parameters = pool_backup.parameters
     backups = pool_backup.backups
@@ -40,8 +41,6 @@ def analyse_pool(pool_backup):
         z[i] = np.mean(b.profits[-span:, :]) / profit_max
 
     # Plot this
-    from pylab import plt
-
     plt.figure(figsize=(10, 6))
 
     plt.scatter(x, y, c=z, zorder=10)
@@ -68,4 +67,11 @@ def analyse_pool(pool_backup):
     plt.ylabel("Mean distance")
 
     plt.tight_layout()
+
+    if file_name:
+        if not os.path.exists("figures"):
+            os.mkdir("figures")
+
+        plt.savefig("figures/{}.pdf".format(file_name))
+
     plt.show()
