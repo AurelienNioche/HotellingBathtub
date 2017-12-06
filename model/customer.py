@@ -6,17 +6,17 @@ import parameters
 
 class Customer:
 
-    def __init__(self, x, parameter_field_of_view):
+    def __init__(self, x, field_of_view):
 
         self.x = x
-        self.parameter_field_of_view = parameter_field_of_view
+        self.rel_field_of_view = field_of_view
 
         # self.firm_choice = None
         # self.utility = None
-        self.field_of_view = self._what_is_seen()
+        self.abs_field_of_view = self._what_is_seen()
 
     def get_field_of_view(self):
-        return self.field_of_view
+        return self.abs_field_of_view
 
     @classmethod
     def get_firm_choice(cls, firms_idx, prices):
@@ -39,7 +39,7 @@ class Customer:
 
     def _get_field_of_view_with_fixed_p(self):
 
-        n_seen = int(self.parameter_field_of_view * parameters.n_positions)
+        n_seen = int(self.rel_field_of_view * parameters.n_positions)
 
         left = np.random.choice((True, False))
         field_of_view = [self.x, self.x]
@@ -59,7 +59,7 @@ class Customer:
 
     def _get_field_of_view_with_fixed_r(self):
 
-        r = int((self.parameter_field_of_view * parameters.n_positions / 2))
+        r = int((self.rel_field_of_view * parameters.n_positions / 2))
 
         field_of_view = (
             max(self.x - r, 0),

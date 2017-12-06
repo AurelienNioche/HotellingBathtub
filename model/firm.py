@@ -1,6 +1,7 @@
 import numpy as np
 
-from model import mlp, utils
+import mlp
+import utils
 import parameters
 
 
@@ -19,8 +20,8 @@ class AbstractFirm(object):
 
         self.profit = 0
 
-    def sell_one_unit(self):
-        self.profit += self.price
+    def sell_x_units(self, x):
+        self.profit += self.price * x
 
     def reset_profit_counter(self):
         self.profit = 0
@@ -71,7 +72,7 @@ class NeuralNetworkFirm(AbstractFirm):
 
         st = {}
         i = 0
-        for pos in range(1, parameters.n_positions + 1):
+        for pos in range(parameters.n_positions):
             for price in range(1, parameters.n_prices + 1):
                 st[i] = {
                     "position": pos,
@@ -158,8 +159,8 @@ class Firm(NeuralNetworkFirm):
 
         network_input = []
 
-        b_position[x-1] = 1
-        b_price[price-1] = 1
+        b_position[x] = 1
+        b_price[price-1] = 1   # min price is 1 (not 0)
 
         network_input += list(b_position)
         network_input += list(b_price)
@@ -168,8 +169,8 @@ class Firm(NeuralNetworkFirm):
 
             b_position[:] = 0
             b_price[:] = 0
-            b_position[opp_pos-1] = 1
-            b_price[opp_price-1] = 1
+            b_position[opp_pos] = 1
+            b_price[opp_price-1] = 1  # min price is 1 (not 0)
 
             network_input += list(b_position)
             network_input += list(b_price)
