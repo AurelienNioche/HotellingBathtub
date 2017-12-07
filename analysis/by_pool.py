@@ -1,7 +1,9 @@
 from pylab import plt, np
 import os
+from scipy.signal import savgol_filter
+import analysis.parameters as analysis
 
-analysis_span = 0.33
+fit = True
 fig_folder = "data/figures"
 os.makedirs(fig_folder, exist_ok=True)
 
@@ -20,7 +22,7 @@ def analyse_pool(pool_backup, file_name=""):
     z = np.zeros(n_simulations)
 
     # How many time steps from the end of the simulation are included in analysis
-    span = int(analysis_span * parameters.t_max)
+    span = int(analysis.span * parameters.t_max)
 
     for i, b in enumerate(backups):
 
@@ -48,6 +50,14 @@ def analyse_pool(pool_backup, file_name=""):
     plt.scatter(x, y, c=z, zorder=10, alpha=0.25)
     plt.colorbar(label="Profits")
 
+    window_size = len(y) - 2 if len(y) % 2 != 0 else len(y) - 1
+    poly_order = 3
+
+    if fit:
+        order = np.argsort(x)
+        y_hat = savgol_filter(y[order], window_size, poly_order)
+        plt.plot(x[order], y_hat, linewidth=2, zorder=20)
+
     # Add boxplot if only extreme values have been tested
     if not parameters.discrete:
         plt.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.1)
@@ -64,9 +74,11 @@ def analyse_pool(pool_backup, file_name=""):
             for b in bp[e]:
                 b.set_alpha(0.5)
 
-    plt.title(parameters.mode.replace("_", " ").capitalize())
     plt.xlabel("Field of view")
     plt.ylabel("Mean distance")
+
+    if file_name:
+        plt.title(file_name)
 
     plt.tight_layout()
 

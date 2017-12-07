@@ -5,10 +5,10 @@
   "alpha": 0.01,
   "momentum": 0.01,
   "temp": 0.01,
-  "n_simulations": 250,
+  "n_simulations": 100,
   "t_max": 3000,
   "zombies_customers": true,
-  "mode": "r_fixed",
+  "mode": "p_fixed",
   "discrete": false,
   "fields_of_view": [
     0.3,

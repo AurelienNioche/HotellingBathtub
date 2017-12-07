@@ -99,10 +99,19 @@ class Environment(object):
             n_customers[:] = self.z[positions[0], positions[1], :2]
 
             to_share = self.z[positions[0], positions[1], 2]
+
             if to_share > 0:
-                r = np.random.randint(to_share + 1)
-                n_customers[0] += r
-                n_customers[1] += to_share - r
+
+                if prices[0] < prices[1]:
+                    n_customers[0] += to_share
+
+                elif prices[1] < prices[0]:
+                    n_customers[1] += to_share
+
+                else:
+                    r = np.random.randint(to_share + 1)
+                    n_customers[0] += r
+                    n_customers[1] += to_share - r
 
             for i in range(2):
                 self.firms[i].sell_x_units(n_customers[i])

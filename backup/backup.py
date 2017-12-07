@@ -17,16 +17,17 @@ class Backup:
 
     def save(self):
 
-        file_name = "backup_{}".format(utils.timestamp())
+        file_name = "{}".format(utils.timestamp())
 
         with open("{}/{}.p".format(self.pickle_folder, file_name), "wb") as f:
             pickle.dump(self, f)
 
         return file_name
 
-    def load(self, file_name):
+    @classmethod
+    def load(cls, file_name):
 
-        with open("{}/{}.p".format(self.pickle_folder, file_name), "rb") as f:
+        with open("{}/{}.p".format(cls.pickle_folder, file_name), "rb") as f:
             return pickle.load(f)
 
 
@@ -68,7 +69,7 @@ class PoolBackup(Backup):
         # Save a summary of parameters in json
         with open("{}/{}.json".format(self.json_folder, file_name), "w") as f:
 
-            param = {"name": file_name}
-            param.update(self.parameters.dict())
+            param = self.parameters.dict()
+            param.update({"name": file_name})
 
             json.dump(param, f, indent=2)

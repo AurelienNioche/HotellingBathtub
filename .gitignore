@@ -108,3 +108,4 @@ venv.bak/
 trials/
 data/
 /parameters/parameters.json
+/analysis/parameters.json

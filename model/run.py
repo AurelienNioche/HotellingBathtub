@@ -19,7 +19,7 @@ def run(i):
         field_of_view = np.random.choice(parameters.fields_of_view)
 
     else:
-        field_of_view = np.random.uniform(0, 1)
+        field_of_view = np.random.uniform(*parameters.fov_boundaries)
 
     # Backup
     b = backup.RunBackup(seed=seeds[i], field_of_view=field_of_view)

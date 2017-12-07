@@ -31,7 +31,7 @@ def analyse_stability(pool_backup):
 
         xx = np.linspace(x.min(), x.max(), len(y))
 
-        window_size = len(y) - 1 if len(y) // 2 != 0 else len(y) - 2
+        window_size = len(y) - 2 if len(y) % 2 == 0 else len(y) - 1
         poly_order = 3
 
         y_hat = savgol_filter(y, window_size, poly_order)
