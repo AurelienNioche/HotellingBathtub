@@ -1,13 +1,6 @@
 import multiprocessing as mlt
-import shutil
 
-
-try:
-    import parameters
-
-except ModuleNotFoundError:
-    shutil.copy("templates/parameters.py", "parameters/parameters.py")
-    import parameters
+import parameters
 
 import model
 import backup
@@ -23,9 +16,11 @@ def main():
     pool_backup = backup.PoolBackup(backups=backups)
 
     if parameters.save is True:
-        pool_backup.save()
+        file_name = pool_backup.save()
+        analysis.analyse_pool(pool_backup, file_name=file_name)
 
-    analysis.analyse_pool(pool_backup)
+    else:
+        analysis.analyse_pool(pool_backup)
 
 
 if __name__ == "__main__":

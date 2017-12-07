@@ -2,6 +2,8 @@ from pylab import plt, np
 import os
 
 analysis_span = 0.33
+fig_folder = "data/figures"
+os.makedirs(fig_folder, exist_ok=True)
 
 
 def analyse_pool(pool_backup, file_name=""):
@@ -43,12 +45,12 @@ def analyse_pool(pool_backup, file_name=""):
     # Plot this
     plt.figure(figsize=(10, 6))
 
-    plt.scatter(x, y, c=z, zorder=10)
+    plt.scatter(x, y, c=z, zorder=10, alpha=0.25)
     plt.colorbar(label="Profits")
 
     # Add boxplot if only extreme values have been tested
     if not parameters.discrete:
-        plt.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.5)
+        plt.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.1)
 
     else:
         to_plot = tuple([[] for i in range(len(parameters.fields_of_view))])
@@ -69,9 +71,6 @@ def analyse_pool(pool_backup, file_name=""):
     plt.tight_layout()
 
     if file_name:
-        if not os.path.exists("figures"):
-            os.mkdir("figures")
-
-        plt.savefig("figures/{}.pdf".format(file_name))
+        plt.savefig("{}/{}.pdf".format(fig_folder, file_name))
 
     plt.show()

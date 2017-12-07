@@ -1,0 +1,21 @@
+{
+  "n_positions": 21,
+  "n_prices": 11,
+  "n_firms": 2,
+  "alpha": 0.01,
+  "momentum": 0.01,
+  "temp": 0.01,
+  "n_simulations": 250,
+  "t_max": 3000,
+  "zombies_customers": true,
+  "mode": "r_fixed",
+  "discrete": false,
+  "fields_of_view": [
+    0.3,
+    0.7
+  ],
+  "fov_boundaries": [
+    0.3,
+    0.7
+  ]
+}

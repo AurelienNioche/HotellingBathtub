@@ -25,7 +25,7 @@ class Environment(object):
         self._spawn_firms(init_firm_positions, init_firm_prices)
         self._spawn_customers(parameter_field_of_view)
 
-        if parameters.n_firms == 2 and parameters.bot_customers:
+        if parameters.n_firms == 2 and parameters.zombies_customers:
             self.compute_z()
 
     def _spawn_firms(self, init_firm_positions, init_firm_prices):
@@ -84,18 +84,6 @@ class Environment(object):
 
         return [f.price for f in self.firms]
 
-    # def get_customer_firm_choices(self):
-    #
-    #     return [c.firm_choice for c in self.customers]
-    #
-    # def get_customer_extra_view_choices(self):
-    #
-    #     return [c.extra_view for c in self.customers]
-    #
-    # def get_customer_utility(self):
-    #
-    #     return [c.utility for c in self.customers]
-
     def time_step_first_part(self):
 
         prices = np.zeros(parameters.n_firms, dtype=int)
@@ -106,7 +94,7 @@ class Environment(object):
 
         n_customers = np.zeros(parameters.n_firms)
 
-        if parameters.n_firms == 2 and parameters.bot_customers:
+        if parameters.n_firms == 2 and parameters.zombies_customers:
 
             n_customers[:] = self.z[positions[0], positions[1], :2]
 

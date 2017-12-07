@@ -16,7 +16,7 @@ class AbstractFirm(object):
         self.price = price
 
         # Max profit used for computing utility
-        self.max_profit = parameters.n_positions * (parameters.n_prices + 1)
+        self.max_profit = parameters.n_positions * parameters.n_prices
 
         self.profit = 0
 
@@ -154,16 +154,22 @@ class Firm(NeuralNetworkFirm):
 
     def _set_network_input(self, x, price, opponents_positions, opponents_prices):
 
-        b_position = np.zeros(parameters.n_positions, dtype=int)
-        b_price = np.zeros(parameters.n_prices, dtype=int)
+        n_po = parameters.n_positions
+        n_pr = parameters.n_prices
 
-        network_input = []
+        b_position = np.zeros(n_po, dtype=int)
+        b_price = np.zeros(n_pr, dtype=int)
 
         b_position[x] = 1
         b_price[price-1] = 1   # min price is 1 (not 0)
 
-        network_input += list(b_position)
-        network_input += list(b_price)
+        begin = 0
+        end = begin + n_po
+        self.network_input[begin:end] = b_position
+
+        begin = end
+        end = begin + n_pr
+        self.network_input[begin:end] = b_price
 
         for opp_pos, opp_price in zip(opponents_positions, opponents_prices):
 
@@ -172,7 +178,10 @@ class Firm(NeuralNetworkFirm):
             b_position[opp_pos] = 1
             b_price[opp_price-1] = 1  # min price is 1 (not 0)
 
-            network_input += list(b_position)
-            network_input += list(b_price)
+            begin = end
+            end = begin + n_po
+            self.network_input[begin:end] = b_position
 
-        self.network_input[:] = network_input
+            begin = end
+            end = begin + n_pr
+            self.network_input[begin:end] = b_price
