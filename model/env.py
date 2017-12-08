@@ -8,10 +8,17 @@ from model import customer, firm
 class Environment(object):
     """Hotelling, 1929"""
 
+    two_players = parameters.n_firms == 2
+    idx = np.arange(parameters.n_firms)
+
     def __init__(self, field_of_view, init_firm_positions, init_firm_prices):
 
         self.firms = []
         self.customers = []
+
+        self.profits = np.zeros(parameters.n_firms, dtype=int)
+        self.positions = np.zeros(parameters.n_firms, dtype=int)
+        self.prices = np.zeros(parameters.n_firms, dtype=int)
 
         self.active_player = 0
 
@@ -22,17 +29,26 @@ class Environment(object):
 
     def set_up(self, parameter_field_of_view, init_firm_positions, init_firm_prices):
 
-        self._spawn_firms(init_firm_positions, init_firm_prices)
-        self._spawn_customers(parameter_field_of_view)
+        self.positions[:] = init_firm_positions
+        self.prices[:] = init_firm_prices
 
-        if parameters.n_firms == 2 and parameters.zombies_customers:
+        if self.two_players and parameters.zombies_customers:
             self.compute_z()
 
-    def _spawn_firms(self, init_firm_positions, init_firm_prices):
+        self._spawn_firms()
+        self._spawn_customers(parameter_field_of_view)
 
-        for position, price in zip(init_firm_positions, init_firm_prices):
+    def _spawn_firms(self):
 
-            f = firm.Firm(x=position, price=price)
+        for i, position, price in zip(self.idx, self.positions, self.prices):
+
+            opponents = self.idx != i
+
+            f = getattr(firm, parameters.firm_class[i])(
+                x=position, price=price,
+                init_opp_positions=self.positions[opponents], init_opp_prices=self.prices[opponents],
+                z=self.z
+            )
             self.firms.append(f)
 
     def _spawn_customers(self, field_of_view):
@@ -67,54 +83,42 @@ class Environment(object):
                 elif see_firm_1:
                     self.z[i, j, 1] += 1
 
-    def _reset_profits(self):
-
-        for f in self.firms:
-            f.reset_profit_counter()
-
-    def get_profits(self):
-
-        return [f.profit for f in self.firms]
-
-    def get_positions(self):
-
-        return [f.x for f in self.firms]
-
-    def get_prices(self):
-
-        return [f.price for f in self.firms]
-
     def time_step_first_part(self):
 
-        prices = np.zeros(parameters.n_firms, dtype=int)
-        positions = np.zeros(parameters.n_firms, dtype=int)
+        # Make active firm play
 
-        prices[:] = self.get_prices()
-        positions[:] = self.get_positions()
+        opponents_passive = self.idx != self.active_player
 
-        n_customers = np.zeros(parameters.n_firms)
+        self.positions[self.active_player], self.prices[self.active_player] = \
+            self.firms[self.active_player].select_strategy(
+                opponents_positions=self.positions[opponents_passive],
+                opponents_prices=self.prices[opponents_passive]
+            )
 
-        if parameters.n_firms == 2 and parameters.zombies_customers:
+    def time_step_second_part(self):
 
-            n_customers[:] = self.z[positions[0], positions[1], :2]
+        # Compute profits
 
-            to_share = self.z[positions[0], positions[1], 2]
+        self.profits[:] = 0
+
+        n_customers = np.zeros(parameters.n_firms, dtype=int)
+
+        if self.two_players and parameters.zombies_customers:
+
+            n_customers[:] = self.z[self.positions[0], self.positions[1], :2]
+
+            to_share = self.z[self.positions[0], self.positions[1], 2]
 
             if to_share > 0:
 
-                if prices[0] < prices[1]:
-                    n_customers[0] += to_share
-
-                elif prices[1] < prices[0]:
-                    n_customers[1] += to_share
+                if self.prices[0] == self.prices[1]:
+                    r = np.random.randint(to_share + 1)
+                    n_customers[:] += r, to_share - r
 
                 else:
-                    r = np.random.randint(to_share + 1)
-                    n_customers[0] += r
-                    n_customers[1] += to_share - r
+                    n_customers[int(self.prices[1] < self.prices[0])] += to_share
 
-            for i in range(2):
-                self.firms[i].sell_x_units(n_customers[i])
+            self.profits += n_customers * self.prices
 
         else:
 
@@ -122,39 +126,21 @@ class Environment(object):
             for c in self.customers:
                 field_of_view = c.get_field_of_view()
 
-                cond0 = positions >= field_of_view[0]
-                cond1 = positions <= field_of_view[1]
+                cond0 = self.positions >= field_of_view[0]
+                cond1 = self.positions <= field_of_view[1]
 
                 firms_idx_c = firms_idx[cond0 * cond1]
 
                 choice = c.get_firm_choice(
-                    firms_idx=firms_idx_c, prices=prices[firms_idx_c])
+                    firms_idx=firms_idx_c, prices=self.prices[firms_idx_c])
 
                 if choice != -1:
-                    self.firms[choice].sell_x_units(1)
+                    self.profits[choice] += self.prices[choice]
 
-    def time_step_second_part(self):
+        # Make firms learn
+        for i in self.idx:
 
-        positions = np.array([self.firms[i].x for i in range(parameters.n_firms)])
-        prices = np.array([self.firms[i].price for i in range(parameters.n_firms)])
+            self.firms[i].learn(self.profits[i])
 
-        idx = np.arange(parameters.n_firms)
-
-        bool_opponents_active = idx[:] != self.active_player
-
-        self.firms[self.active_player].select_strategy(
-            opponents_positions=positions[bool_opponents_active],
-            opponents_prices=prices[bool_opponents_active]
-        )
-
-        for i in idx[bool_opponents_active]:
-            bool_opponents_i = idx[:] != i
-
-            self.firms[i].change_in_opponents_strategies(
-                old_opponents_positions=positions[bool_opponents_i],
-                old_opponents_prices=prices[bool_opponents_i]
-            )
-
-        self._reset_profits()
-
+        # Change active player
         self.active_player = (self.active_player + 1) % parameters.n_firms

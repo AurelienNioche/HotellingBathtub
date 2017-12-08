@@ -17,5 +17,6 @@
   "fov_boundaries": [
     0.3,
     0.7
-  ]
+  ],
+  "firm_class": "PseudoOptimalFirm"
 }

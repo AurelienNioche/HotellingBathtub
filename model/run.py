@@ -39,9 +39,9 @@ def run(i):
         # For future analysis
         b.update(
             t=t,
-            positions=e.get_positions(),
-            prices=e.get_prices(),
-            profits=e.get_profits()
+            positions=e.positions,
+            prices=e.prices,
+            profits=e.profits
         )
 
         # End turn

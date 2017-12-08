@@ -38,6 +38,7 @@ with open("parameters/parameters.json", "r") as f:
     discrete = __parameters__["discrete"]
     fields_of_view = __parameters__["fields_of_view"]
     fov_boundaries = __parameters__["fov_boundaries"]
+    firm_class = __parameters__["firm_class"]
 
 
 class Parameters:

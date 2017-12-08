@@ -3,7 +3,7 @@ import os
 from scipy.signal import savgol_filter
 import analysis.parameters as analysis
 
-fit = True
+
 fig_folder = "data/figures"
 os.makedirs(fig_folder, exist_ok=True)
 
@@ -53,7 +53,7 @@ def analyse_pool(pool_backup, file_name=""):
     window_size = len(y) - 2 if len(y) % 2 != 0 else len(y) - 1
     poly_order = 3
 
-    if fit:
+    if analysis.fit:
         order = np.argsort(x)
         y_hat = savgol_filter(y[order], window_size, poly_order)
         plt.plot(x[order], y_hat, linewidth=2, zorder=20)
