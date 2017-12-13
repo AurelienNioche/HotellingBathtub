@@ -5,7 +5,7 @@
   "alpha": 0.01,
   "momentum": 0.01,
   "temp": 0.01,
-  "n_simulations": 100,
+  "n_simulations": 3000,
   "t_max": 3000,
   "zombies_customers": true,
   "mode": "p_fixed",
@@ -15,8 +15,9 @@
     0.7
   ],
   "fov_boundaries": [
-    0.3,
-    0.7
+    0,
+    1
   ],
-  "firm_class": "PseudoOptimalFirm"
+  "firm_class": ["Firm", "Firm"],
+  "unit_value": 0.01
 }

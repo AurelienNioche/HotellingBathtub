@@ -39,6 +39,12 @@ with open("parameters/parameters.json", "r") as f:
     fields_of_view = __parameters__["fields_of_view"]
     fov_boundaries = __parameters__["fov_boundaries"]
     firm_class = __parameters__["firm_class"]
+    unit_value = __parameters__["unit_value"]
+
+
+def get():
+
+    return list(__parameters__.items())
 
 
 class Parameters:

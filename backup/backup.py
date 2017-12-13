@@ -12,12 +12,24 @@ class Backup:
     pickle_folder = "data/pickle"
     os.makedirs(pickle_folder, exist_ok=True)
 
+    json_folder = "data/json"
+    os.makedirs(json_folder, exist_ok=True)
+
     def __init__(self):
-        pass
+
+        self.parameters = parameters.Parameters()
 
     def save(self):
 
         file_name = "{}".format(utils.timestamp())
+
+        # Save a summary of parameters in json
+        with open("{}/{}.json".format(self.json_folder, file_name), "w") as f:
+
+            param = self.parameters.dict()
+            param.update({"name": file_name})
+
+            json.dump(param, f, indent=2)
 
         with open("{}/{}.p".format(self.pickle_folder, file_name), "wb") as f:
             pickle.dump(self, f)
@@ -41,7 +53,7 @@ class RunBackup(Backup):
 
         self.positions = np.zeros((parameters.t_max, parameters.n_firms), dtype=int)
         self.prices = np.zeros((parameters.t_max, parameters.n_firms), dtype=int)
-        self.profits = np.zeros((parameters.t_max, parameters.n_firms), dtype=int)
+        self.profits = np.zeros((parameters.t_max, parameters.n_firms))
 
     def update(self, t, positions, prices, profits):
 
@@ -52,24 +64,8 @@ class RunBackup(Backup):
 
 class PoolBackup(Backup):
 
-    json_folder = "data/json"
-    os.makedirs(json_folder, exist_ok=True)
-
     def __init__(self, backups):
         super().__init__()
 
         self.backups = backups
-        self.parameters = parameters.Parameters()
 
-    def save(self):
-
-        # Save data in pickle
-        file_name = super().save()
-
-        # Save a summary of parameters in json
-        with open("{}/{}.json".format(self.json_folder, file_name), "w") as f:
-
-            param = self.parameters.dict()
-            param.update({"name": file_name})
-
-            json.dump(param, f, indent=2)

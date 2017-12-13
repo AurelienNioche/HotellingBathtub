@@ -6,7 +6,7 @@ class AbstractFirm(object):
     """Abstract class for firm"""
 
     # Max profit used for computing utility
-    max_profit = parameters.n_positions * parameters.n_prices
+    max_profit = parameters.n_positions * parameters.n_prices * parameters.unit_value
 
     def __init__(self, x, price, **kwargs):
 

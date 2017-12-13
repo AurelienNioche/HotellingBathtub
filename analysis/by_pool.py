@@ -41,7 +41,7 @@ def analyse_pool(pool_backup, file_name=""):
         y_err[i] = spacing_std
 
         # Get mean profits
-        profit_max = parameters.n_positions * parameters.n_prices
+        profit_max = parameters.n_positions * parameters.n_prices * parameters.unit_value
         z[i] = np.mean(b.profits[-span:, :]) / profit_max
 
     # Plot this

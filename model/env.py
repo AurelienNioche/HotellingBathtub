@@ -16,9 +16,9 @@ class Environment(object):
         self.firms = []
         self.customers = []
 
-        self.profits = np.zeros(parameters.n_firms, dtype=int)
         self.positions = np.zeros(parameters.n_firms, dtype=int)
         self.prices = np.zeros(parameters.n_firms, dtype=int)
+        self.profits = np.zeros(parameters.n_firms)
 
         self.active_player = 0
 
@@ -32,11 +32,11 @@ class Environment(object):
         self.positions[:] = init_firm_positions
         self.prices[:] = init_firm_prices
 
-        if self.two_players and parameters.zombies_customers:
-            self.compute_z()
-
         self._spawn_firms()
         self._spawn_customers(parameter_field_of_view)
+
+        if self.two_players and parameters.zombies_customers:
+            self.compute_z()
 
     def _spawn_firms(self):
 
@@ -60,7 +60,9 @@ class Environment(object):
 
     def compute_z(self):
 
-        self.z = np.zeros((parameters.n_positions, parameters.n_positions, 3))
+        assert len(self.customers), "Customers have to be spawn before computing z."
+
+        self.z = np.zeros((parameters.n_positions, parameters.n_positions, 3), dtype=int)
         # Last parameter is idx0: n customers seeing only A,
         #                   idx1: n customers seeing only B,
         #                   idx2: customers seeing A and B,
@@ -98,7 +100,6 @@ class Environment(object):
     def time_step_second_part(self):
 
         # Compute profits
-
         self.profits[:] = 0
 
         n_customers = np.zeros(parameters.n_firms, dtype=int)
@@ -118,7 +119,7 @@ class Environment(object):
                 else:
                     n_customers[int(self.prices[1] < self.prices[0])] += to_share
 
-            self.profits += n_customers * self.prices
+            self.profits += n_customers * self.prices * parameters.unit_value
 
         else:
 
@@ -135,7 +136,7 @@ class Environment(object):
                     firms_idx=firms_idx_c, prices=self.prices[firms_idx_c])
 
                 if choice != -1:
-                    self.profits[choice] += self.prices[choice]
+                    self.profits[choice] += self.prices[choice] * parameters.unit_value
 
         # Make firms learn
         for i in self.idx:

@@ -11,8 +11,6 @@ class Customer:
         self.x = x
         self.rel_field_of_view = field_of_view
 
-        # self.firm_choice = None
-        # self.utility = None
         self.abs_field_of_view = self._what_is_seen()
 
     def get_field_of_view(self):
@@ -29,11 +27,7 @@ class Customer:
             firm_choice = np.random.choice(firms_idx[prices == price])
 
         else:
-            # price = 0
             firm_choice = -1
-
-        # exploration_cost = self.t_cost * self.extra_view
-        # self.utility = int(consume) * self.u_consumption - (exploration_cost + price)
 
         return firm_choice
 
@@ -41,25 +35,37 @@ class Customer:
 
         n_seen = int(self.rel_field_of_view * parameters.n_positions)
 
-        left = np.random.choice((True, False))
         field_of_view = [self.x, self.x]
-        for i in range(n_seen - 1):  # Customer already sees its own position
-            if left:
-                if field_of_view[0] - 1 > 0:
+
+        n = n_seen - 1  # Customer already sees its own position
+
+        left = np.random.choice([True, False])
+
+        for i in range(n):
+
+            if left:  # Extent on the left
+
+                if field_of_view[0] - 1 >= 0:
                     field_of_view[0] -= 1
+
                 else:
                     field_of_view[1] += 1
-            else:
+
+            else:  # Extent on the right
+
                 if field_of_view[1] + 1 < parameters.n_positions:
                     field_of_view[1] += 1
+
                 else:
                     field_of_view[0] -= 1
+
+            left = np.invert(left)  # Begin by the other side at the next iteration
 
         return field_of_view
 
     def _get_field_of_view_with_fixed_r(self):
 
-        r = int((self.rel_field_of_view * parameters.n_positions / 2))
+        r = int((self.rel_field_of_view * parameters.n_positions) / 2)
 
         field_of_view = (
             max(self.x - r, 0),
@@ -79,4 +85,3 @@ class Customer:
             raise ValueError("'mode' in parameters contains a misspelling.")
 
         return field_of_view
-
