@@ -109,3 +109,4 @@ trials/
 data/
 /parameters/parameters.json
 /analysis/parameters.json
+tasks/

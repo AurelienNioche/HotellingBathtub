@@ -1,5 +1,6 @@
 import multiprocessing as mlt
 import tqdm
+import os
 
 import parameters
 
@@ -8,8 +9,10 @@ import backup
 import analysis
 
 
-def main():
+def main(parameters_file=None):
     """Produce data"""
+
+    parameters.load(parameters_file)
 
     print('Parameters are: ', parameters.get())
 
@@ -23,14 +26,17 @@ def main():
 
     pool_backup = backup.PoolBackup(backups=backups)
 
-    if parameters.save is True:
-        file_name = pool_backup.save()
-        analysis.analyse_pool(pool_backup, file_name=file_name)
-
-    else:
-        analysis.analyse_pool(pool_backup)
+    file_name = pool_backup.save()
+    analysis.analyse_pool(pool_backup, file_name=file_name)
 
 
 if __name__ == "__main__":
 
-    main()
+    parameters_files = [os.path.join("tasks", f)
+                        for f in os.listdir("tasks") if os.path.isfile(os.path.join("tasks", f))]
+    if parameters_files:
+        for i in parameters_files:
+            main(i)  # Use every parameters file contained in tasks folder
+
+    else:
+        main()  # Use default parameters file located in parameters.json
