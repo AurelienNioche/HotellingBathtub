@@ -18,7 +18,7 @@ def main():
     backups = []
 
     for i in tqdm.tqdm(
-            pool.imap_unordered(model.run, range(parameters.n_simulations), total=parameters.n_simulations)):
+            pool.imap_unordered(model.run, range(parameters.n_simulations)), total=parameters.n_simulations):
         backups.append(i)
 
     pool_backup = backup.PoolBackup(backups=backups)

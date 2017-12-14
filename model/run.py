@@ -9,7 +9,7 @@ seeds = np.random.randint(2**32, size=parameters.n_simulations)
 
 def run(i):
 
-    print("Run simulation {}...\n".format(i))
+    # print("Run simulation {}...\n".format(i))
 
     # For reproduction and variability
     np.random.seed(seeds[i])
@@ -47,7 +47,7 @@ def run(i):
         # End turn
         e.time_step_second_part()
 
-    print("Simulation {} ends successfully.".format(i))
+    # print("Simulation {} ends successfully.".format(i))
 
     return b
 
