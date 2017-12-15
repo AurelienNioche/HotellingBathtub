@@ -31,12 +31,10 @@ def main(parameters_file=None):
 
 if __name__ == "__main__":
 
-    parameters_files = None
-
     if os.path.exists("tasks"):
+
         parameters_files = [os.path.join("tasks", f)
                             for f in os.listdir("tasks") if os.path.isfile(os.path.join("tasks", f))]
-    if parameters_files:
         for i in parameters_files:
             main(i)  # Use every parameters file contained in tasks folder
 
