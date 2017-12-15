@@ -3,8 +3,10 @@ import datetime
 
 
 def softmax(x, temp):
-    """Compute softmax values
-    for each sets of scores in x."""
+    """
+    Compute softmax values
+    for each sets of scores in x.
+    """
 
     e_x = np.exp(x / temp)
 

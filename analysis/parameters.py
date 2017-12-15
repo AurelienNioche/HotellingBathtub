@@ -8,7 +8,7 @@ save = True
 __json_file__ = "parameters/parameters.json"
 
 if not os.path.exists("parameters/parameters.json"):
-    shutil.copy("templates/analysis_parameters.json", "analysis/parameters.json")
+    shutil.copy("templates/parameters.json", "analysis/parameters.json")
 
 with open("analysis/parameters.json", "r") as f:
 

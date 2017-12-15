@@ -11,20 +11,20 @@ import numpy as np
 
 
 def sigmoid(x):
-    ''' Sigmoid like function using tanh '''
+    """ Sigmoid like function using tanh """
     return np.tanh(x)
 
 
 def dsigmoid(x):
-    ''' Derivative of sigmoid above '''
+    """ Derivative of sigmoid above """
     return 1.0 - x ** 2
 
 
 class MLP:
-    ''' Multi-layer perceptron class. '''
+    """ Multi-layer perceptron class. """
 
     def __init__(self, *args):
-        ''' Initialization of the perceptron with given sizes.  '''
+        """ Initialization of the perceptron with given sizes.  """
 
         self.shape = args
         n = len(args)
@@ -50,14 +50,14 @@ class MLP:
         self.reset()
 
     def reset(self):
-        ''' Reset weights '''
+        """ Reset weights """
 
         for i in range(len(self.weights)):
             Z = np.random.random((self.layers[i].size, self.layers[i + 1].size))
             self.weights[i][...] = (2 * Z - 1) * 0.25
 
     def propagate_forward(self, data):
-        ''' Propagate data from input layer to output layer. '''
+        """ Propagate data from input layer to output layer. """
 
         # Set input layer
         self.layers[0][0:-1] = data
@@ -71,7 +71,7 @@ class MLP:
         return self.layers[-1]
 
     def propagate_backward(self, target, lrate=0.1, momentum=0.1):
-        ''' Back propagate error related to target using lrate. '''
+        """ Back propagate error related to target using lrate. """
 
         deltas = []
 

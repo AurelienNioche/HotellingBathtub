@@ -1,8 +1,11 @@
 import numpy as np
 import itertools as it
+import hypothesis
 
 import parameters
+
 from model import customer, firm
+
 
 
 class Environment(object):
