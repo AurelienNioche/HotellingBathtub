@@ -17,6 +17,9 @@ class PseudoOptimalFirm(AbstractFirm):
 
         self.exp_profits = np.zeros(len(self.options))
 
+    def learn(self, profit):
+        pass
+
     def select_strategy(self, opponents_positions, opponents_prices):
 
         assert len(opponents_positions) == 1, \
