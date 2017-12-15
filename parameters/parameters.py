@@ -30,35 +30,20 @@ def load(json_file=None):
         json_file = __json_file__
 
     with open(json_file, "r") as f:
-
-        __parameters__ = json.load(f)
-
-        # This will not me manipulated very often
-        n_positions = __parameters__["n_positions"]  # By default, 21.
-        n_prices = __parameters__["n_prices"]  # By default, 11
-        n_firms = __parameters__["n_firms"]  # We will assume that it is 2. A change can induce not expected behaviors.
-
-        alpha = __parameters__["alpha"]  # Range is 0-1
-        momentum = __parameters__["momentum"]  # Range is 0-1
-        temp = __parameters__["temp"]  # Range is 0-1
-
-        # This will influence the computation time, but also the robustness of the results
-        n_simulations = __parameters__["n_simulations"]
-        t_max = __parameters__["t_max"]
-
-        # These variables should affect results in an interesting manner
-        zombies_customers = __parameters__["zombies_customers"]  # If true, customers will have no learning abilities
-        mode = __parameters__["mode"]  # Could be "p_fixed" or "r_fixed
-        discrete = __parameters__["discrete"]
-        fields_of_view = __parameters__["fields_of_view"]
-        fov_boundaries = __parameters__["fov_boundaries"]
-        firm_class = __parameters__["firm_class"]
-        unit_value = __parameters__["unit_value"]
+        set_items(json.load(f))
 
 
 def get():
     global __parameters__
     return list(__parameters__.items())
+
+
+def set_items(dict_like):
+
+    global __parameters__
+    __parameters__ = dict_like
+    for i in __parameters__:
+        globals()[i] = dict_like[i]
 
 
 # Default json_file to use as parameters
@@ -68,16 +53,16 @@ __json_file__ = "parameters/parameters.json"
 __parameters__ = None
 
 # Parameters
-n_positions = None
-n_prices = None
-n_firms = None
-alpha = None
-momentum = None
-temp = None
+n_positions = None        # By default, 21.
+n_prices = None           # By default, 11
+n_firms = None            # We will assume that it is 2. A change can induce not expected behaviors.
+alpha = None              # Range is 0-1
+momentum = None           # Range is 0-1
+temp = None               # Range is 0-1
 n_simulations = None
 t_max = None
-zombies_customers = None
-mode = None
+zombies_customers = None  # If true, customers will have no learning abilities
+mode = None               # Could be "p_fixed" or "r_fixed
 discrete = None
 fields_of_view = None
 fov_boundaries = None
@@ -87,6 +72,3 @@ unit_value = None
 # -------------------------- #
 
 load()
-
-
-
