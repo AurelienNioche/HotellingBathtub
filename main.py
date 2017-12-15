@@ -31,7 +31,7 @@ def main(parameters_file=None):
 
 if __name__ == "__main__":
 
-    if os.path.exists("tasks"):
+    if os.path.exists("tasks") and os.listdir("tasks"):
 
         parameters_files = [os.path.join("tasks", f)
                             for f in os.listdir("tasks") if os.path.isfile(os.path.join("tasks", f))]
