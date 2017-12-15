@@ -3,7 +3,6 @@ import tqdm
 import os
 
 import parameters
-
 import model
 import backup
 import analysis
@@ -20,9 +19,9 @@ def main(parameters_file=None):
 
     backups = []
 
-    for i in tqdm.tqdm(
+    for bkp in tqdm.tqdm(
             pool.imap_unordered(model.run, range(parameters.n_simulations)), total=parameters.n_simulations):
-        backups.append(i)
+        backups.append(bkp)
 
     pool_backup = backup.PoolBackup(backups=backups)
 
