@@ -5,7 +5,13 @@ import parameters
 from model import env
 
 
+# global count variable
+trials = 0
+
+
 def run(kwargs):
+
+    global trials
 
     #  Parameters definition
     param = {
@@ -37,7 +43,6 @@ def run(kwargs):
     # To return: mean of this list
     profits = []
 
-    print(param.dict())
     # Environment object
     for field in [0.3, 0.7]:
 
@@ -50,6 +55,8 @@ def run(kwargs):
 
         for t in range(param.t_max):
 
+            print("\rTrial nb {} =>  time step {}".format(trials, t), end='')
+
             # New time step
             e.time_step_first_part()
 
@@ -57,6 +64,8 @@ def run(kwargs):
             e.time_step_second_part()
 
             profits.append(np.mean(e.profits))
+
+    trials += 1
 
     return -np.mean(profits)
 
@@ -75,7 +84,7 @@ def main():
         max_evals=10
     )
 
-    print(result)
+    print('\nOptimized parameters are: ', result)
 
 
 if __name__ == '__main__':

@@ -13,13 +13,11 @@ class Firm(AbstractFirm):
     """Firm with learning"""
 
     def __init__(self, init_opp_positions, init_opp_prices, parameters, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(parameters=parameters, **kwargs)
 
         self.alpha = parameters.alpha
         self.momentum = parameters.momentum
         self.temp = parameters.temp
-
-        self.parameters = parameters
 
         self.options = np.arange(parameters.n_positions * parameters.n_prices)
 

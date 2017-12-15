@@ -1,4 +1,4 @@
-import parameters
+# import parameters
 
 
 class AbstractFirm(object):
@@ -8,10 +8,11 @@ class AbstractFirm(object):
     """
 
     # Max profit used for computing utility
-    max_profit = parameters.n_positions * parameters.n_prices * parameters.unit_value
 
-    def __init__(self, x, price, **kwargs):
+    def __init__(self, x, price, parameters, **kwargs):
 
+        self.parameters = parameters
+        self.max_profit = parameters.n_positions * parameters.n_prices * parameters.unit_value
         # Position and price
         self.x = x
         self.price = price

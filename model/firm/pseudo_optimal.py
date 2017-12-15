@@ -8,12 +8,12 @@ from model.firm import AbstractFirm
 class PseudoOptimalFirm(AbstractFirm):
     """Pseudo optimal player for a 2-players game"""
 
-    options = np.array(list(it.product(range(parameters.n_positions), range(1, parameters.n_prices + 1))))
-
-    def __init__(self, z, **kwargs):
-
+    def __init__(self, z, parameters, **kwargs):
         super().__init__(**kwargs)
+
         self.z = z
+
+        self.options = np.array(list(it.product(range(parameters.n_positions), range(1, parameters.n_prices + 1))))
 
         self.exp_profits = np.zeros(len(self.options))
 
