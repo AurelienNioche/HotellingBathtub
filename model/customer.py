@@ -69,7 +69,7 @@ class Customer:
 
         field_of_view = (
             max(self.x - r, 0),
-            min(self.x + r, parameters.n_positions-1))
+            min(self.x + r, parameters.n_positions - 1))
 
         return field_of_view
 

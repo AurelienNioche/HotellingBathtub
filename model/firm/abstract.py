@@ -3,7 +3,9 @@ import parameters
 
 class AbstractFirm(object):
 
-    """Abstract class for firm"""
+    """
+    Abstract class for firm
+    """
 
     # Max profit used for computing utility
     max_profit = parameters.n_positions * parameters.n_prices * parameters.unit_value
@@ -22,7 +24,7 @@ class AbstractFirm(object):
         return profit / self.max_profit
 
     def learn(self, profit):
-        pass
+        raise NotImplementedError
 
     def select_strategy(self, opponents_positions, opponents_prices):
-        pass
+        raise NotImplementedError
