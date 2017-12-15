@@ -1,12 +1,14 @@
 import numpy as np
 
 
-import parameters
+# import parameters
 
 
 class Customer:
 
-    def __init__(self, x, field_of_view):
+    def __init__(self, x, field_of_view, parameters):
+
+        self.parameters = parameters
 
         self.x = x
         self.rel_field_of_view = field_of_view
@@ -33,7 +35,7 @@ class Customer:
 
     def _get_field_of_view_with_fixed_p(self):
 
-        n_seen = int(self.rel_field_of_view * parameters.n_positions)
+        n_seen = int(self.rel_field_of_view * self.parameters.n_positions)
 
         field_of_view = [self.x, self.x]
 
@@ -53,7 +55,7 @@ class Customer:
 
             else:  # Extent on the right
 
-                if field_of_view[1] + 1 < parameters.n_positions:
+                if field_of_view[1] + 1 < self.parameters.n_positions:
                     field_of_view[1] += 1
 
                 else:
@@ -65,20 +67,20 @@ class Customer:
 
     def _get_field_of_view_with_fixed_r(self):
 
-        r = int((self.rel_field_of_view * parameters.n_positions) / 2)
+        r = int((self.rel_field_of_view * self.parameters.n_positions) / 2)
 
         field_of_view = (
             max(self.x - r, 0),
-            min(self.x + r, parameters.n_positions - 1))
+            min(self.x + r, self.parameters.n_positions - 1))
 
         return field_of_view
 
     def _what_is_seen(self):
 
-        if parameters.mode == "p_fixed":
+        if self.parameters.mode == "p_fixed":
             field_of_view = self._get_field_of_view_with_fixed_p()
 
-        elif parameters.mode == "r_fixed":
+        elif self.parameters.mode == "r_fixed":
             field_of_view = self._get_field_of_view_with_fixed_r()
 
         else:

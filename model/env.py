@@ -1,20 +1,20 @@
 import numpy as np
 import itertools as it
-import hypothesis
-
-import parameters
+# import parameters
 
 from model import customer, firm
-
 
 
 class Environment(object):
     """Hotelling, 1929"""
 
-    two_players = parameters.n_firms == 2
-    idx = np.arange(parameters.n_firms)
+    def __init__(self, field_of_view, init_firm_positions, init_firm_prices, parameters):
 
-    def __init__(self, field_of_view, init_firm_positions, init_firm_prices):
+        self.parameters = parameters
+
+        self.two_players = parameters.n_firms == 2
+
+        self.idx = np.arange(parameters.n_firms)
 
         self.firms = []
         self.customers = []
@@ -38,7 +38,7 @@ class Environment(object):
         self._spawn_firms()
         self._spawn_customers(parameter_field_of_view)
 
-        if self.two_players and parameters.zombies_customers:
+        if self.two_players and self.parameters.zombies_customers:
             self.compute_z()
 
     def _spawn_firms(self):
@@ -47,30 +47,31 @@ class Environment(object):
 
             opponents = self.idx != i
 
-            f = getattr(firm, parameters.firm_class[i])(
+            f = getattr(firm, self.parameters.firm_class[i])(
                 x=position, price=price,
                 init_opp_positions=self.positions[opponents], init_opp_prices=self.prices[opponents],
-                z=self.z
+                z=self.z,
+                parameters=self.parameters
             )
             self.firms.append(f)
 
     def _spawn_customers(self, field_of_view):
 
-        for i in range(parameters.n_positions):
+        for i in range(self.parameters.n_positions):
 
-            c = customer.Customer(x=i, field_of_view=field_of_view)
+            c = customer.Customer(x=i, field_of_view=field_of_view, parameters=self.parameters)
             self.customers.append(c)
 
     def compute_z(self):
 
         assert len(self.customers), "Customers have to be spawn before computing z."
 
-        self.z = np.zeros((parameters.n_positions, parameters.n_positions, 3), dtype=int)
+        self.z = np.zeros((self.parameters.n_positions, self.parameters.n_positions, 3), dtype=int)
         # Last parameter is idx0: n customers seeing only A,
         #                   idx1: n customers seeing only B,
         #                   idx2: customers seeing A and B,
 
-        for i, j in it.product(range(parameters.n_positions), repeat=2):
+        for i, j in it.product(range(self.parameters.n_positions), repeat=2):
 
             for c in self.customers:
 
@@ -105,9 +106,9 @@ class Environment(object):
         # Compute profits
         self.profits[:] = 0
 
-        n_customers = np.zeros(parameters.n_firms, dtype=int)
+        n_customers = np.zeros(self.parameters.n_firms, dtype=int)
 
-        if self.two_players and parameters.zombies_customers:
+        if self.two_players and self.parameters.zombies_customers:
 
             n_customers[:] = self.z[self.positions[0], self.positions[1], :2]
 
@@ -122,11 +123,12 @@ class Environment(object):
                 else:
                     n_customers[int(self.prices[1] < self.prices[0])] += to_share
 
-            self.profits += n_customers * self.prices * parameters.unit_value
+            self.profits += n_customers * self.prices * self.parameters.unit_value
 
         else:
 
-            firms_idx = np.arange(parameters.n_firms)
+            firms_idx = np.arange(self.parameters.n_firms)
+
             for c in self.customers:
                 field_of_view = c.get_field_of_view()
 
@@ -139,7 +141,7 @@ class Environment(object):
                     firms_idx=firms_idx_c, prices=self.prices[firms_idx_c])
 
                 if choice != -1:
-                    self.profits[choice] += self.prices[choice] * parameters.unit_value
+                    self.profits[choice] += self.prices[choice] * self.parameters.unit_value
 
         # Make firms learn
         for i in self.idx:
@@ -147,4 +149,4 @@ class Environment(object):
             self.firms[i].learn(self.profits[i])
 
         # Change active player
-        self.active_player = (self.active_player + 1) % parameters.n_firms
+        self.active_player = (self.active_player + 1) % self.parameters.n_firms

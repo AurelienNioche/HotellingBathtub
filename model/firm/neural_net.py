@@ -2,7 +2,7 @@ import numpy as np
 
 import mlp
 import utils
-import parameters
+# import parameters
 
 
 from model.firm import AbstractFirm
@@ -12,14 +12,16 @@ class Firm(AbstractFirm):
 
     """Firm with learning"""
 
-    alpha = parameters.alpha
-    momentum = parameters.momentum
-    temp = parameters.temp
-
-    options = np.arange(parameters.n_positions * parameters.n_prices)
-
-    def __init__(self, init_opp_positions, init_opp_prices, **kwargs):
+    def __init__(self, init_opp_positions, init_opp_prices, parameters, **kwargs):
         super().__init__(**kwargs)
+
+        self.alpha = parameters.alpha
+        self.momentum = parameters.momentum
+        self.temp = parameters.temp
+
+        self.parameters = parameters
+
+        self.options = np.arange(parameters.n_positions * parameters.n_prices)
 
         # Size of input depend of the level of strategy
         self.network_input = np.zeros(self._get_network_input_size())
@@ -38,13 +40,12 @@ class Firm(AbstractFirm):
 
         self._set_up()
 
-    @classmethod
-    def _get_strategies(cls):
+    def _get_strategies(self):
 
         st = {}
         i = 0
-        for pos in range(parameters.n_positions):
-            for price in range(1, parameters.n_prices + 1):
+        for pos in range(self.parameters.n_positions):
+            for price in range(1, self.parameters.n_prices + 1):
                 st[i] = {
                     "position": pos,
                     "price": price
@@ -91,14 +92,13 @@ class Firm(AbstractFirm):
 
         return mlp.MLP(self.network_input.size, self.network_input.size, 1)
 
-    @classmethod
-    def _get_network_input_size(cls):
-        return parameters.n_firms*parameters.n_positions + parameters.n_firms*parameters.n_prices
+    def _get_network_input_size(self):
+        return self.parameters.n_firms*self.parameters.n_positions +self.parameters.n_firms*self.parameters.n_prices
 
     def _set_network_input(self, x, price, set_opponents_part=True):
 
-        n_po = parameters.n_positions
-        n_pr = parameters.n_prices
+        n_po = self.parameters.n_positions
+        n_pr = self.parameters.n_prices
 
         b_position = np.zeros(n_po, dtype=int)
         b_price = np.zeros(n_pr, dtype=int)

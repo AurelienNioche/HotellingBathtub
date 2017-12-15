@@ -34,8 +34,6 @@ def run(kwargs):
 
     parameters.set_items(param)
 
-    from model import env
-
     # To return: mean of this list
     profits = []
 
