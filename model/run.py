@@ -1,18 +1,17 @@
 import numpy as np
 
-import parameters
 import backup
 from . import env
 
-seeds = np.random.randint(2**32, size=parameters.n_simulations)
 
+def run(args):
 
-def run(i):
+    seed, parameters = args
 
     # print("Run simulation {}...\n".format(i))
 
     # For reproduction and variability
-    np.random.seed(seeds[i])
+    np.random.seed(seed)
 
     # Get the parameter that will affect the field of view of customers
     if parameters.discrete is True:
@@ -22,7 +21,7 @@ def run(i):
         field_of_view = np.random.uniform(*parameters.fov_boundaries)
 
     # Backup
-    b = backup.RunBackup(seed=seeds[i], field_of_view=field_of_view)
+    b = backup.RunBackup(seed=seed, field_of_view=field_of_view)
 
     # Environment object
     e = env.Environment(

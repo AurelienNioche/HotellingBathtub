@@ -1,14 +1,17 @@
-import parameters
+import numpy as np
 
+import parameters
 import model
 
 
 def main():
     """Produce data"""
+    param = parameters.load()
 
-    print('Parameters are: ', parameters.get())
+    print('Parameters are: ', param.dict())
 
-    model.run(0)
+    seed = np.random.randint(2**32)
+    model.run((seed, param))
 
 
 if __name__ == "__main__":

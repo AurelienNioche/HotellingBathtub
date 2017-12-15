@@ -32,22 +32,23 @@ def run(kwargs):
         "unit_value": 1
     }
 
-    parameters.set_items(param)
+    param = parameters.Parameters(**param)
 
     # To return: mean of this list
     profits = []
 
-    print(parameters.get())
+    print(param.dict())
     # Environment object
     for field in [0.3, 0.7]:
 
         e = env.Environment(
+            parameters=param,
             field_of_view=field,
             init_firm_positions=[10, 10],
             init_firm_prices=[5, 5]
         )
 
-        for t in range(parameters.t_max):
+        for t in range(param.t_max):
 
             # New time step
             e.time_step_first_part()

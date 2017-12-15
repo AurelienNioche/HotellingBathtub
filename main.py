@@ -1,6 +1,7 @@
 import multiprocessing as mlt
 import tqdm
 import os
+import numpy as np
 
 import parameters
 import model
@@ -11,16 +12,19 @@ import analysis
 def main(parameters_file=None):
     """Produce data"""
 
-    parameters.load(parameters_file)
+    param = parameters.load(parameters_file)
 
-    print('Parameters are: ', parameters.get())
+    print('Parameters are: ', param.dict())
 
     pool = mlt.Pool()
 
     backups = []
 
+    seeds = np.random.randint(2**32, size=param.n_simulations)
+
     for bkp in tqdm.tqdm(
-            pool.imap_unordered(model.run, range(parameters.n_simulations)), total=parameters.n_simulations):
+            pool.imap_unordered(model.run, zip(seeds, (param, ) * param.n_simulations)),
+            total=param.n_simulations):
         backups.append(bkp)
 
     pool_backup = backup.PoolBackup(backups=backups)

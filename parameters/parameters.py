@@ -5,12 +5,24 @@ import shutil
 
 class Parameters:
 
-    def __init__(self):
-
-        global __parameters__
-
-        for key, value in __parameters__.items():
-            setattr(self, key, value)
+    def __init__(
+            self, n_positions, n_prices, n_firms, alpha, momentum, temp, n_simulations, t_max,
+            zombies_customers, mode, discrete, fields_of_view, fov_boundaries, firm_class, unit_value):
+        self.n_positions = n_positions  # By default, 21.
+        self.n_prices = n_prices  # By default, 11
+        self.n_firms = n_firms  # We will assume that it is 2. A change can induce not expected behaviors.
+        self.alpha = alpha  # Range is 0-1
+        self.momentum = momentum  # Range is 0-1
+        self.temp = temp  # Range is 0-1
+        self.n_simulations = n_simulations
+        self.t_max = t_max
+        self.zombies_customers = zombies_customers  # If true, customers will have no learning abilities
+        self.mode = mode  # Could be "p_fixed" or "r_fixed
+        self.discrete = discrete
+        self.fields_of_view = fields_of_view
+        self.fov_boundaries = fov_boundaries
+        self.firm_class = firm_class
+        self.unit_value = unit_value
 
     def dict(self):
         return {i: j for i, j in self.__dict__.items() if not i.startswith("__")}
@@ -18,57 +30,12 @@ class Parameters:
 
 def load(json_file=None):
 
-    global __json_file__, __parameters__, n_positions, n_prices, n_firms, alpha, momentum, temp, n_simulations, \
-        t_max, zombies_customers, mode, discrete, fields_of_view, fov_boundaries, \
-        firm_class, unit_value
-
     if json_file is None:
 
-        if not os.path.exists(__json_file__):
-            shutil.copy("templates/parameters.json", __json_file__)
+        json_file = "parameters/parameters.json"
 
-        json_file = __json_file__
+        if not os.path.exists(json_file):
+            shutil.copy("templates/parameters.json", json_file)
 
     with open(json_file, "r") as f:
-        set_items(json.load(f))
-
-
-def get():
-    global __parameters__
-    return list(__parameters__.items())
-
-
-def set_items(dict_like):
-
-    global __parameters__
-    __parameters__ = dict_like
-    for i in __parameters__:
-        globals()[i] = dict_like[i]
-
-
-# Default json_file to use as parameters
-__json_file__ = "parameters/parameters.json"
-
-# Containers for parameters
-__parameters__ = None
-
-# Parameters
-n_positions = None        # By default, 21.
-n_prices = None           # By default, 11
-n_firms = None            # We will assume that it is 2. A change can induce not expected behaviors.
-alpha = None              # Range is 0-1
-momentum = None           # Range is 0-1
-temp = None               # Range is 0-1
-n_simulations = None
-t_max = None
-zombies_customers = None  # If true, customers will have no learning abilities
-mode = None               # Could be "p_fixed" or "r_fixed
-discrete = None
-fields_of_view = None
-fov_boundaries = None
-firm_class = None
-unit_value = None
-
-# -------------------------- #
-
-load()
+        return Parameters(**json.load(f))
