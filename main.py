@@ -27,7 +27,7 @@ def main(parameters_file=None):
             total=param.n_simulations):
         backups.append(bkp)
 
-    pool_backup = backup.PoolBackup(backups=backups)
+    pool_backup = backup.PoolBackup(parameters=param, backups=backups)
 
     file_name = pool_backup.save()
     analysis.analyse_pool(pool_backup, file_name=file_name)

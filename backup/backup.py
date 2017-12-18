@@ -4,7 +4,6 @@ import pickle
 import json
 
 from utils import utils
-import parameters
 
 
 class Backup:
@@ -15,9 +14,9 @@ class Backup:
     json_folder = "data/json"
     os.makedirs(json_folder, exist_ok=True)
 
-    def __init__(self):
+    def __init__(self, parameters):
 
-        self.parameters = parameters.Parameters()
+        self.parameters = parameters
 
     def save(self):
 
@@ -45,8 +44,8 @@ class Backup:
 
 class RunBackup(Backup):
 
-    def __init__(self, seed, field_of_view):
-        super().__init__()
+    def __init__(self, parameters, seed, field_of_view):
+        super().__init__(parameters)
 
         self.seed = seed
         self.field_of_view = field_of_view
@@ -64,8 +63,8 @@ class RunBackup(Backup):
 
 class PoolBackup(Backup):
 
-    def __init__(self, backups):
-        super().__init__()
+    def __init__(self, parameters, backups):
+        super().__init__(parameters)
 
         self.backups = backups
 

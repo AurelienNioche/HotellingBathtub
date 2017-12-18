@@ -21,10 +21,11 @@ def run(args):
         field_of_view = np.random.uniform(*parameters.fov_boundaries)
 
     # Backup
-    b = backup.RunBackup(seed=seed, field_of_view=field_of_view)
+    b = backup.RunBackup(seed=seed, field_of_view=field_of_view, parameters=parameters)
 
     # Environment object
     e = env.Environment(
+        parameters=parameters,
         field_of_view=field_of_view,
         init_firm_positions=np.random.randint(parameters.n_positions, size=2),
         init_firm_prices=1 + np.random.randint(parameters.n_prices, size=2)
