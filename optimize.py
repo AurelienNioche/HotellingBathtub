@@ -1,5 +1,6 @@
 import hyperopt as hpt   # Warning! TypeError: 'generator' object is not subscriptable -> pip install networkx==1.11
 import numpy as np
+import os
 
 import parameters
 from model import env
@@ -22,7 +23,7 @@ def run(kwargs):
         "momentum": 0,
         "temp": kwargs["temp"],
         "n_simulations": 1,
-        "t_max": 2000,
+        "t_max": 3000,
         "zombies_customers": False,
         "mode": "p_fixed",
         "discrete": True,
@@ -44,7 +45,7 @@ def run(kwargs):
     profits = []
 
     # Environment object
-    for field in [0.3, 0.5, 0.7]:
+    for field in [0.3, 0.4, 0.5, 0.6, 0.7]:
 
         e = env.Environment(
             parameters=param,
@@ -55,7 +56,7 @@ def run(kwargs):
 
         for t in range(param.t_max):
 
-            print("\rTrial {} =>  time step {}".format(trials, t), end='')
+            print("\rTrial {} => cond:{}, time step: {}".format(trials, field, t), end='')
 
             # New time step
             e.time_step_first_part()
@@ -63,7 +64,7 @@ def run(kwargs):
             # End turn
             e.time_step_second_part()
 
-            if t > 1500:
+            if t > 0.33*param.t_max:
                 profits.append(np.mean(e.profits))
 
     trials += 1
@@ -74,7 +75,7 @@ def run(kwargs):
 def main():
 
     space = {
-        'alpha': hpt.hp.uniform('alpha', 0.05, 0.3),
+        'alpha': hpt.hp.uniform('alpha', 0.09, 0.3),
         'temp': hpt.hp.uniform('temp', 0.015, 0.025)
     }
 
@@ -82,10 +83,16 @@ def main():
         fn=run,
         space=space,
         algo=hpt.tpe.suggest,
-        max_evals=100
+        max_evals=1000
     )
 
-    print('\nOptimized parameters are: ', result)
+    os.makedirs("optimization", exist_ok=True)
+
+    with open("optimization/optimization_results.txt", 'a') as f:
+        line = '\nOptimized parameters are: {}'.format(result)
+        f.write(line)
+        f.close()
+        print(line)
 
 
 if __name__ == '__main__':
