@@ -1,4 +1,4 @@
-import hyperopt as hpt
+import hyperopt as hpt   # Warning! TypeError: 'generator' object is not subscriptable -> pip install networkx==1.11
 import numpy as np
 
 import parameters
@@ -22,7 +22,7 @@ def run(kwargs):
         "momentum": 0,
         "temp": kwargs["temp"],
         "n_simulations": 1,
-        "t_max": 50,
+        "t_max": 2000,
         "zombies_customers": False,
         "mode": "p_fixed",
         "discrete": True,
@@ -44,7 +44,7 @@ def run(kwargs):
     profits = []
 
     # Environment object
-    for field in [0.3, 0.7]:
+    for field in [0.3, 0.5, 0.7]:
 
         e = env.Environment(
             parameters=param,
@@ -55,7 +55,7 @@ def run(kwargs):
 
         for t in range(param.t_max):
 
-            print("\rTrial nb {} =>  time step {}".format(trials, t), end='')
+            print("\rTrial {} =>  time step {}".format(trials, t), end='')
 
             # New time step
             e.time_step_first_part()
@@ -63,7 +63,8 @@ def run(kwargs):
             # End turn
             e.time_step_second_part()
 
-            profits.append(np.mean(e.profits))
+            if t > 1500:
+                profits.append(np.mean(e.profits))
 
     trials += 1
 
@@ -74,14 +75,14 @@ def main():
 
     space = {
         'alpha': hpt.hp.uniform('alpha', 0.05, 0.3),
-        'temp': hpt.hp.uniform('temp', 0.01, 0.03)
+        'temp': hpt.hp.uniform('temp', 0.015, 0.025)
     }
 
     result = hpt.fmin(
         fn=run,
         space=space,
         algo=hpt.tpe.suggest,
-        max_evals=10
+        max_evals=100
     )
 
     print('\nOptimized parameters are: ', result)
