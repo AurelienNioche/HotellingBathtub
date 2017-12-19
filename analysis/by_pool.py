@@ -8,7 +8,7 @@ fig_folder = "data/figures"
 os.makedirs(fig_folder, exist_ok=True)
 
 
-def analyse_pool(pool_backup, file_name=""):
+def analyse_pool(pool_backup, file_name="", bw=True):
 
     parameters = pool_backup.parameters
     backups = pool_backup.backups
@@ -43,6 +43,36 @@ def analyse_pool(pool_backup, file_name=""):
         # Get mean profits
         profit_max = parameters.n_positions * parameters.n_prices * parameters.unit_value
         z[i] = np.mean(b.profits[-span:, :]) / profit_max
+
+    if bw:
+        plot_bw(x, y, file_name)
+
+    else:
+        plot_color(x, y, z, y_err, parameters, backups, file_name)
+
+
+def plot_bw(x, y, file_name):
+
+    # Plot this
+    plt.figure(figsize=(10, 6))
+
+    plt.scatter(x, y, c="black", alpha=0.25)
+
+    plt.xlabel("Field of view")
+    plt.ylabel("Mean distance")
+
+    if file_name:
+        plt.title(file_name)
+
+    plt.tight_layout()
+
+    if file_name:
+        plt.savefig("{}/{}_gray.pdf".format(fig_folder, file_name))
+
+    plt.show()
+
+
+def plot_color(x, y, z, y_err, parameters, backups, file_name):
 
     # Plot this
     plt.figure(figsize=(10, 6))
