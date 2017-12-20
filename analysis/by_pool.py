@@ -9,7 +9,7 @@ fig_folder = "data/figures"
 os.makedirs(fig_folder, exist_ok=True)
 
 
-def analyse_pool(file_name, bw=True):
+def analyse_pool(file_name, bw=False):
 
     pool_backup = backup.PoolBackup.load(file_name=file_name)
 
@@ -59,7 +59,7 @@ def plot_bw(x, y, file_name):
     # Plot this
     plt.figure(figsize=(10, 6))
 
-    plt.scatter(x, y, c="black", alpha=0.25)
+    plt.scatter(x, y, facecolor="black", edgecolor='none', s=25, alpha=0.15)
 
     plt.xlabel("Field of view")
     plt.ylabel("Mean distance")
@@ -75,15 +75,15 @@ def plot_bw(x, y, file_name):
     plt.show()
 
 
-def plot_color(x, y, z, y_err, parameters, backups, file_name):
+def plot_color(x, y, z, y_err, parameters, backups, file_name, show_error_bars=False):
 
     # Plot this
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 5))
 
     plt.scatter(x, y, c=z, zorder=10, alpha=0.25)
     plt.colorbar(label="Profits")
 
-    fit = True
+    fit = False
 
     if fit:
         window_size = len(y) - 2 if len(y) % 2 != 0 else len(y) - 1
@@ -93,17 +93,18 @@ def plot_color(x, y, z, y_err, parameters, backups, file_name):
         plt.plot(x[order], y_hat, linewidth=2, zorder=20)
 
     # Add boxplot if only extreme values have been tested
-    if not parameters.discrete:
-        plt.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.1)
+    if not parameters.running_mode == "discrete":
+        if show_error_bars:
+            plt.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.1)
 
     else:
-        to_plot = tuple([[] for i in range(len(parameters.fields_of_view))])
+        to_plot = tuple([[] for i in range(len(parameters.fov_if_discrete))])
 
         for i, b in enumerate(backups):
-            cond = parameters.fields_of_view.index(b.field_of_view)
+            cond = parameters.fov_if_discrete.index(b.field_of_view)
             to_plot[cond].append(y[i])
 
-        bp = plt.boxplot(to_plot, positions=parameters.fields_of_view)
+        bp = plt.boxplot(to_plot, positions=parameters.fov_if_discrete)
         for e in ['boxes', 'caps', 'whiskers']:
             for b in bp[e]:
                 b.set_alpha(0.5)

@@ -40,7 +40,7 @@ def main(parameters_file=None):
 
         print("Data have been saved using file name: '{}'.".format(file_name))
 
-        analysis.analyse_pool(pool_backup, file_name=file_name)
+        analysis.analyse_pool(file_name=file_name)
 
 
 if __name__ == "__main__":

@@ -3,9 +3,7 @@ from pylab import np, plt
 import backup
 
 
-def evo_positions():
-
-    file_name = "2017-12-20_15-19-40_743987"
+def evo_positions(file_name):
 
     bkp = backup.RunBackup.load(file_name=file_name)
 

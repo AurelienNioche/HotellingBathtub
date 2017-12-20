@@ -3,7 +3,7 @@ import numpy as np
 import backup
 
 
-def evo_strategies(file_name):
+def ascii_viewer(file_name):
 
     bkp = backup.RunBackup.load(file_name=file_name)
 
