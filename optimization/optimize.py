@@ -36,7 +36,9 @@ def run(kwargs):
             1
           ],
         "firm_class": ["Firm", "Firm"],
-        "unit_value": 1
+        "unit_value": 1,
+        "unique": True,
+        "unique_fov": True
     }
 
     param = parameters.Parameters(**param)

@@ -111,4 +111,4 @@ data/
 /analysis/parameters.json
 tasks/
 doc/
-optimization
+optimization/optimization_results.txt

@@ -1,5 +1,4 @@
 import itertools as it
-import parameters
 import numpy as np
 
 from model.firm import AbstractFirm
@@ -9,12 +8,11 @@ class PseudoOptimalFirm(AbstractFirm):
     """Pseudo optimal player for a 2-players game"""
 
     def __init__(self, z, parameters, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(parameters=parameters, **kwargs)
 
         self.z = z
 
         self.options = np.array(list(it.product(range(parameters.n_positions), range(1, parameters.n_prices + 1))))
-
         self.exp_profits = np.zeros(len(self.options))
 
     def learn(self, profit):

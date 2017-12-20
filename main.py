@@ -14,23 +14,33 @@ def main(parameters_file=None):
 
     param = parameters.load(parameters_file)
 
-    print('Parameters are: ', param.dict())
+    if param.running_mode == 'unique':
+        seed = np.random.randint(2 ** 32)
+        bkp = model.run((seed, param))
+        file_path = bkp.save()
+        print("Data have been saved using file name: '{}'.".format(file_path))
 
-    pool = mlt.Pool()
+    else:
+        print('Parameters are: ', param.dict())
 
-    backups = []
+        pool = mlt.Pool()
 
-    seeds = np.random.randint(2**32, size=param.n_simulations)
+        backups = []
 
-    for bkp in tqdm.tqdm(
-            pool.imap_unordered(model.run, zip(seeds, (param, ) * param.n_simulations)),
-            total=param.n_simulations):
-        backups.append(bkp)
+        seeds = np.random.randint(2**32, size=param.n_simulations)
 
-    pool_backup = backup.PoolBackup(parameters=param, backups=backups)
+        for bkp in tqdm.tqdm(
+                pool.imap_unordered(model.run, zip(seeds, (param, ) * param.n_simulations)),
+                total=param.n_simulations):
+            backups.append(bkp)
 
-    file_name = pool_backup.save()
-    analysis.analyse_pool(pool_backup, file_name=file_name)
+        pool_backup = backup.PoolBackup(parameters=param, backups=backups)
+
+        file_name = pool_backup.save()
+
+        print("Data have been saved using file name: '{}'.".format(file_name))
+
+        analysis.analyse_pool(pool_backup, file_name=file_name)
 
 
 if __name__ == "__main__":

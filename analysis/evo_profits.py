@@ -1,8 +1,6 @@
 from pylab import plt, np
 import os
 import tqdm
-from scipy.signal import savgol_filter
-import analysis.parameters as analysis
 
 
 fig_folder = "data/figures"
@@ -11,15 +9,17 @@ os.makedirs(fig_folder, exist_ok=True)
 
 def analyse_profits(pool_backup, file_name=""):
 
-    parameters = pool_backup.parameters
-    backups = pool_backup.backups
-
-    profit_max = parameters.n_positions * parameters.n_prices * parameters.unit_value
+    def f_cond(xx):
+        if xx < 0.25:
+            return 0
+        elif xx < 0.5:
+            return 1
+        elif xx < 0.75:
+            return 2
+        else:
+            return 3
 
     n_pools = 4
-
-    # labels = [str(i) for i in range(n_pools)]
-
     labels = [
         "0 <= FoV < 0.25",
         "0.25 <= FoV < 0.50",
@@ -27,9 +27,10 @@ def analyse_profits(pool_backup, file_name=""):
         "0.75 <= FoV <= 1"
     ]
 
-    # f_cond = lambda x: 0 if x < 0.33 else 1 if 0.33 <= x <= 0.66 else 2
+    parameters = pool_backup.parameters
+    backups = pool_backup.backups
 
-    f_cond = lambda x: 0 if x < 0.25 else 1 if x < 0.5 else 2 if x < 0.75 else 3
+    profit_max = parameters.n_positions * parameters.n_prices * parameters.unit_value
 
     x = range(parameters.t_max)
     for_y = [[[] for j in range(parameters.t_max)] for i in range(n_pools)]
@@ -60,4 +61,5 @@ def analyse_profits(pool_backup, file_name=""):
     if file_name:
         plt.savefig("{}/{}_mean_profit_{}_cat.pdf".format(fig_folder, file_name, n_pools))
 
-    # plt.show()
+    plt.show()
+

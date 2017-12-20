@@ -77,10 +77,10 @@ class Customer:
 
     def _what_is_seen(self):
 
-        if self.parameters.mode == "p_fixed":
+        if self.parameters.fov_mode == "p_fixed":
             field_of_view = self._get_field_of_view_with_fixed_p()
 
-        elif self.parameters.mode == "r_fixed":
+        elif self.parameters.fov_mode == "r_fixed":
             field_of_view = self._get_field_of_view_with_fixed_r()
 
         else:

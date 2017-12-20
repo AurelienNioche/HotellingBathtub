@@ -1,14 +1,17 @@
 from pylab import plt, np
 import os
 from scipy.signal import savgol_filter
-import analysis.parameters as analysis
+
+import backup
 
 
 fig_folder = "data/figures"
 os.makedirs(fig_folder, exist_ok=True)
 
 
-def analyse_pool(pool_backup, file_name="", bw=True):
+def analyse_pool(file_name, bw=True):
+
+    pool_backup = backup.PoolBackup.load(file_name=file_name)
 
     parameters = pool_backup.parameters
     backups = pool_backup.backups
@@ -22,7 +25,7 @@ def analyse_pool(pool_backup, file_name="", bw=True):
     z = np.zeros(n_simulations)
 
     # How many time steps from the end of the simulation are included in analysis
-    span = int(analysis.span * parameters.t_max)
+    span = int(0.33 * parameters.t_max)
 
     for i, b in enumerate(backups):
 
@@ -80,10 +83,11 @@ def plot_color(x, y, z, y_err, parameters, backups, file_name):
     plt.scatter(x, y, c=z, zorder=10, alpha=0.25)
     plt.colorbar(label="Profits")
 
-    window_size = len(y) - 2 if len(y) % 2 != 0 else len(y) - 1
-    poly_order = 3
+    fit = True
 
-    if analysis.fit:
+    if fit:
+        window_size = len(y) - 2 if len(y) % 2 != 0 else len(y) - 1
+        poly_order = 3
         order = np.argsort(x)
         y_hat = savgol_filter(y[order], window_size, poly_order)
         plt.plot(x[order], y_hat, linewidth=2, zorder=20)

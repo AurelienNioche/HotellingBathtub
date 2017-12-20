@@ -35,11 +35,12 @@ class Environment(object):
         self.positions[:] = init_firm_positions
         self.prices[:] = init_firm_prices
 
-        self._spawn_firms()
         self._spawn_customers(parameter_field_of_view)
 
         if self.two_players and self.parameters.zombies_customers:
             self.compute_z()
+
+        self._spawn_firms()
 
     def _spawn_firms(self):
 

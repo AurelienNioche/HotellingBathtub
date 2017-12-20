@@ -1,23 +1,12 @@
 {
   "n_positions": 21,
   "n_prices": 11,
-  "n_firms": 2,
-  "alpha": 0.01,
-  "momentum": 0.01,
-  "temp": 0.01,
-  "n_simulations": 200,
+  "alpha": 0.25,
+  "momentum": 0,
+  "temp": 0.02,
+  "n_simulations": 3000,
   "t_max": 3000,
-  "zombies_customers": true,
-  "mode": "p_fixed",
-  "discrete": false,
-  "fields_of_view": [
-    0.3,
-    0.7
-  ],
-  "fov_boundaries": [
-    0,
-    1
-  ],
-  "firm_class": ["Firm", "Firm"],
-  "unit_value": 0.01
+  "fov_mode": "r_fixed",
+  "running_mode": "default",
+  "firm_class": ["Firm", "Firm"]
 }

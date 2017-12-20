@@ -1,11 +1,15 @@
 from pylab import plt, np
 from scipy.signal import savgol_filter
 
+import backup
+
 
 sample_size = 10
 
 
-def analyse_stability(pool_backup):
+def analyse_stability(file_name):
+
+    pool_backup = backup.PoolBackup.load(file_name)
 
     parameters = pool_backup.parameters
     backups = pool_backup.backups
@@ -38,4 +42,3 @@ def analyse_stability(pool_backup):
         plt.plot(xx, y_hat, linewidth=2)
 
         plt.show()
-
