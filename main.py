@@ -7,6 +7,9 @@ import parameters
 import model
 import backup
 import analysis
+import avakas
+
+import sys
 
 
 def main(parameters_file=None):
@@ -19,6 +22,8 @@ def main(parameters_file=None):
         bkp = model.run((seed, param))
         file_path = bkp.save()
         print("Data have been saved using file name: '{}'.".format(file_path))
+
+        analysis.evo_positions(file_path)
 
     else:
         print('Parameters are: ', param.dict())
@@ -45,7 +50,13 @@ def main(parameters_file=None):
 
 if __name__ == "__main__":
 
+    if len(sys.argv) > 1:
+        i = sys.argv[1]
+        parameters_file = avakas.get
+
     if os.path.exists("tasks") and os.listdir("tasks"):
+
+        print("I will use the parameters files in the 'tasks' directory.")
 
         parameters_files = [os.path.join("tasks", f)
                             for f in os.listdir("tasks") if os.path.isfile(os.path.join("tasks", f))]
