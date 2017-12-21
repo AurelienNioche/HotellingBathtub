@@ -8,4 +8,9 @@ def count_jobs():
     else:
         n_jobs = 0
 
-    return n_jobs
+    print(n_jobs)
+
+
+if __name__ == "__main__":
+    count_jobs()
+
