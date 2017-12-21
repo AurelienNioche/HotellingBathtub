@@ -4,9 +4,9 @@
   "n_simulations": 500,
   "t_max": 1000,
   "fov_mode": "r_fixed",
-  "running_mode": "default",
+  "running_mode": "unique",
   "fov_boundaries": [0, 2],
-  "fov_if_unique": 0.5,
+  "fov_if_unique": 1,
   "firm_class": ["PseudoOptimalFirm", "PseudoOptimalFirm"],
   "unit_value": 0.1
 }
