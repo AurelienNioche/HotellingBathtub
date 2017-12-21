@@ -2,6 +2,7 @@ import multiprocessing as mlt
 import tqdm
 import os
 import numpy as np
+import _tkinter
 
 import parameters
 import model
@@ -20,10 +21,13 @@ def main(parameters_file=None):
     if param.running_mode == 'unique':
         seed = np.random.randint(2 ** 32)
         bkp = model.run((seed, param))
-        file_path = bkp.save()
-        print("Data have been saved using file name: '{}'.".format(file_path))
+        file_name = bkp.save()
+        print("Data have been saved using file name: '{}'.".format(file_name))
 
-        analysis.evo_positions(file_path)
+        try:
+            analysis.evo_positions(file_name)
+        except _tkinter.TclError:
+            print("Figures can not be produced if there is no graphic server.")
 
     else:
         print('Parameters are: ', param.dict())
@@ -45,14 +49,18 @@ def main(parameters_file=None):
 
         print("Data have been saved using file name: '{}'.".format(file_name))
 
-        analysis.analyse_pool(file_name=file_name)
+        try:
+            analysis.analyse_pool(file_name=file_name)
+        except _tkinter.TclError:
+            print("Figures can not be produced if there is no graphic server.")
 
 
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         i = sys.argv[1]
-        parameters_file = avakas.get
+        parameters_file = avakas.get_parameters_file(i)
+        main(parameters_file)
 
     if os.path.exists("tasks") and os.listdir("tasks"):
 
