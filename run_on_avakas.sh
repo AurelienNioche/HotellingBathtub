@@ -3,6 +3,8 @@
 N_JOBS_MINUS_1=$(($(eval python avakas/count_jobs.py) - 1))
 INDICES="0-${N_JOBS_MINUS_1}"
 
+echo $INDICES
+
 # qsub needs Python 2 on the avakas cluster
 export PYENV_VERSION=2.7.12
 
