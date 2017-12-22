@@ -32,7 +32,7 @@ def distance_over_fov(file_name, bw=False, show_error_bars=False, show_fitting_c
     for i, b in enumerate(backups):
 
         # Save the parameter that affected the customers field of view
-        x[i] = b.field_of_view
+        x[i] = b.field_of_view / 2
 
         # Compute the mean distance between the two firms
         data = np.absolute(
@@ -49,25 +49,30 @@ def distance_over_fov(file_name, bw=False, show_error_bars=False, show_fitting_c
         profit_max = parameters.n_positions * parameters.n_prices * parameters.unit_value
         z[i] = np.mean(b.profits[-span:, :]) / profit_max
 
-    add_title_and_labels(file_name=file_name)
+    # Plot this
+    fig = plt.figure(figsize=(10, 6))
+    ax = plt.subplot()
+
+    add_title_and_labels(ax)
+    add_comment_with_file_name(fig=fig, file_name=file_name)
 
     if show_error_bars:
-        plt.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.1)
+        ax.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.1)
 
     if show_fitting_curve:
-        add_fitting_curve(x, y)
+        add_fitting_curve(ax=ax, x=x, y=y)
 
     if parameters.running_mode == "discrete":
-        boxplot(pool_backup=pool_backup, y=y)
+        boxplot(pool_backup=pool_backup, ax=ax, y=y)
 
     if bw:
-        plot_bw(x=x, y=y, file_name=file_name)
+        plot_bw(ax=ax, x=x, y=y, file_name=file_name)
 
     else:
-        plot_color(x=x, y=y, z=z, file_name=file_name)
+        plot_color(fig=fig, ax=ax, x=x, y=y, z=z, file_name=file_name)
 
 
-def boxplot(pool_backup, y):
+def boxplot(pool_backup, ax, y):
 
     parameters = pool_backup.parameters
     backups = pool_backup.backups
@@ -79,18 +84,15 @@ def boxplot(pool_backup, y):
         cond = parameters.fov_if_discrete.index(b.field_of_view)
         to_plot[cond].append(y[i])
 
-    bp = plt.boxplot(to_plot, positions=parameters.fov_if_discrete)
+    bp = ax.boxplot(to_plot, positions=parameters.fov_if_discrete)
     for e in ['boxes', 'caps', 'whiskers']:
         for b in bp[e]:
             b.set_alpha(0.5)
 
 
-def plot_bw(x, y, file_name):
+def plot_bw(ax, x, y, file_name):
 
-    # Plot this
-    plt.figure(figsize=(10, 6))
-
-    plt.scatter(x, y, facecolor="black", edgecolor='none', s=25, alpha=0.15)
+    ax.scatter(x, y, facecolor="black", edgecolor='none', s=25, alpha=0.15)
 
     plt.tight_layout()
 
@@ -100,34 +102,36 @@ def plot_bw(x, y, file_name):
     plt.show()
 
 
-def plot_color(x, y, z, file_name):
+def plot_color(fig, ax, x, y, z, file_name):
 
-    # Plot this
-    plt.figure(figsize=(10, 5))
-
-    plt.scatter(x, y, c=z, zorder=10, alpha=0.25)
-    plt.colorbar(label="Profits")
+    abc = ax.scatter(x, y, c=z, zorder=10, alpha=0.25)
+    fig.colorbar(abc, label="Profits")
 
     plt.tight_layout()
 
     if file_name:
         plt.savefig("{}/{}.pdf".format(fig_folder, file_name))
 
+    plt.show()
 
-def add_fitting_curve(x, y):
+
+def add_comment_with_file_name(fig, file_name):
+    plt.text(0.005, 0.005, file_name, transform=fig.transFigure, fontsize='x-small', color='0.5')
+
+
+def add_fitting_curve(ax, x, y):
 
     window_size = len(y) - 2 if len(y) % 2 != 0 else len(y) - 1
     poly_order = 3
     order = np.argsort(x)
     y_hat = savgol_filter(y[order], window_size, poly_order)
-    plt.plot(x[order], y_hat, linewidth=2, zorder=20)
+    ax.plot(x[order], y_hat, linewidth=2, zorder=20)
 
 
-def add_title_and_labels(file_name):
+def add_title_and_labels(ax):
 
-    plt.xlabel("Field of view")
-    plt.ylabel("Mean distance")
+    ax.set_xlabel("$r$")
+    ax.set_ylabel("Mean distance")
 
-    if file_name:
-        plt.title(file_name)
+    ax.set_title("Mean distance between firms over $r$")
 

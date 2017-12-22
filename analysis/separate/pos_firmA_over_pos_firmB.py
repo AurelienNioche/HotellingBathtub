@@ -17,6 +17,9 @@ def pos_firmA_over_pos_firmB(file_name):
     ax = fig.add_subplot(111)
 
     ax.scatter(pos[:, 0], pos[:, 1], color="black", alpha=0.05)
+    ax.axvline(0.5, color="white", linewidth=0.5, linestyle="--")
+    ax.axhline(0.5, color="white", linewidth=0.5, linestyle="--")
+
     plt.xlim(-1, bkp.parameters.n_positions)
     plt.ylim(-1, bkp.parameters.n_positions)
     plt.xticks(range(0, bkp.parameters.n_positions+1, round(bkp.parameters.n_positions/5)))
