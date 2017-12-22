@@ -14,7 +14,7 @@ class Parameters:
             fov_if_unique=0.5,
             fov_if_discrete=(0.25, 0.5),
             fov_boundaries=(0, 1),
-            firm_class=("Firm", "Firm")):
+            firm_class=("Firm", "Firm"), name=""):
 
         self.n_positions = n_positions  # By default, 21.
         self.n_prices = n_prices  # By default, 11
@@ -32,6 +32,7 @@ class Parameters:
         self.fov_boundaries = fov_boundaries  # Will be used when fov is randomly drawn
         self.firm_class = firm_class  # Could be "PseudoOptimalFirm", "Firm", "Stupid"
         self.unit_value = unit_value  # Default is one
+        self.name = name
 
     def dict(self):
         return {i: j for i, j in self.__dict__.items() if not i.startswith("__")}
