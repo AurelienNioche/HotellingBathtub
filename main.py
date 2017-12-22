@@ -25,7 +25,7 @@ def main(parameters_file=None):
         print("Data have been saved using file name: '{}'.".format(file_name))
 
         try:
-            analysis.evo_positions(file_name)
+            analysis.separate.pos_firmA_over_pos_firmB(file_name)
         except _tkinter.TclError:
             print("Figures can not be produced if there is no graphic server.")
 
@@ -50,7 +50,7 @@ def main(parameters_file=None):
         print("Data have been saved using file name: '{}'.".format(file_name))
 
         try:
-            analysis.analyse_pool(file_name=file_name)
+            analysis.pool.distance_over_fov(file_name=file_name)
         except _tkinter.TclError:
             print("Figures can not be produced if there is no graphic server.")
 

@@ -3,10 +3,12 @@ import analysis
 
 def main():
 
-    file_name = "2017-12-21_17-00-14_669489"
+    # file_name = "2017-12-22_13-23-58_025412"
+    file_name = "2017-12-22_13-26-07_335384"
 
-    analysis.evo_positions(file_name)
-    analysis.ascii_viewer(file_name)
+    # analysis.separate.pos_firmA_over_pos_firmB(file_name)
+    # analysis.separate.ascii_viewer(file_name)
+    analysis.separate.eeg_like(file_name)
     # analysis.analyse_pool("2017-12-20_16-47-16_824170")
 
 
