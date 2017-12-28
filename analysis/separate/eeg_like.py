@@ -13,12 +13,12 @@ def eeg_like(file_name):
 
     t_max = 250  # bkp.parameters.t_max
 
-    t = np.arange(t_max)
+    t = np.arange(1, t_max)
 
-    position_A = pst[1:251, 0]
-    position_B = pst[1:251, 1]
-    price_A = prc[1:251, 0]
-    price_B = prc[1:251, 0]
+    position_A = pst[1:t_max, 0]
+    position_B = pst[1:t_max, 1]
+    price_A = prc[1:t_max, 0]
+    price_B = prc[1:t_max, 0]
 
     color_A = "orange"
     color_B = "blue"
@@ -89,4 +89,7 @@ def eeg_like(file_name):
     ax.set_xlabel("Time", labelpad=10)
 
     plt.text(0.005, 0.005, file_name, transform=fig.transFigure, fontsize='x-small', color='0.5')
+
+    plt.savefig("data/figures/{}_eeg_like.pdf".format(file_name))
+
     plt.show()
