@@ -7,7 +7,12 @@ fig_folder = "data/figures"
 os.makedirs(fig_folder, exist_ok=True)
 
 
-def pos_firmA_over_pos_firmB(file_name):
+def pos_firmA_over_pos_firmB(file_name, folder=None):
+
+    if folder is None:
+        folder = "data/figures"
+
+    os.makedirs(folder, exist_ok=True)
 
     bkp = backup.RunBackup.load(file_name=file_name)
 
@@ -24,10 +29,14 @@ def pos_firmA_over_pos_firmB(file_name):
     plt.ylim(-1, bkp.parameters.n_positions)
     plt.xticks(range(0, bkp.parameters.n_positions+1, round(bkp.parameters.n_positions/5)))
     plt.yticks(range(0, bkp.parameters.n_positions+1, round(bkp.parameters.n_positions/5)))
-    plt.xlabel("x1")
-    plt.ylabel("x2")
-    plt.title("{}\nfield of view: {}".format(file_name,  bkp.field_of_view))
+
+    plt.xlabel("Position A")
+    plt.ylabel("Position B")
+
+    plt.text(0.005, 0.005, file_name, transform=fig.transFigure, fontsize='x-small', color='0.5')
+
+    plt.title("$r={:.2f}$".format(bkp.field_of_view/2))
     ax.set_aspect(1)
     plt.tight_layout()
-    plt.savefig("data/figures/{}_evo_positions.pdf".format(file_name))
+    plt.savefig("{}/{}_evo_positions.pdf".format(folder, file_name))
     plt.show()

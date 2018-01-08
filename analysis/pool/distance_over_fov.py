@@ -4,14 +4,15 @@ from scipy.signal import savgol_filter
 
 import backup
 
-
-fig_folder = "data/figures"
-os.makedirs(fig_folder, exist_ok=True)
-
 span_ratio = 0.33
 
 
-def distance_over_fov(file_name, bw=False, show_error_bars=False, show_fitting_curve=False):
+def distance_over_fov(file_name, bw=False, show_error_bars=False, show_fitting_curve=False, folder=None):
+
+    if folder is None:
+        folder = "data/figures"
+
+    os.makedirs(folder, exist_ok=True)
 
     pool_backup = backup.PoolBackup.load(file_name=file_name)
 
@@ -66,10 +67,10 @@ def distance_over_fov(file_name, bw=False, show_error_bars=False, show_fitting_c
         boxplot(pool_backup=pool_backup, ax=ax, y=y)
 
     if bw:
-        plot_bw(ax=ax, x=x, y=y, file_name=file_name)
+        plot_bw(ax=ax, x=x, y=y, file_name=file_name, folder=folder)
 
     else:
-        plot_color(fig=fig, ax=ax, x=x, y=y, z=z, file_name=file_name)
+        plot_color(fig=fig, ax=ax, x=x, y=y, z=z, file_name=file_name, folder=folder)
 
 
 def boxplot(pool_backup, ax, y):
@@ -90,19 +91,19 @@ def boxplot(pool_backup, ax, y):
             b.set_alpha(0.5)
 
 
-def plot_bw(ax, x, y, file_name):
+def plot_bw(ax, x, y, file_name, folder):
 
     ax.scatter(x, y, facecolor="black", edgecolor='none', s=25, alpha=0.15)
 
     plt.tight_layout()
 
     if file_name:
-        plt.savefig("{}/{}_gray.pdf".format(fig_folder, file_name))
+        plt.savefig("{}/{}_gray.pdf".format(folder, file_name))
 
     plt.show()
 
 
-def plot_color(fig, ax, x, y, z, file_name):
+def plot_color(fig, ax, x, y, z, file_name, folder):
 
     abc = ax.scatter(x, y, c=z, zorder=10, alpha=0.25)
     fig.colorbar(abc, label="Profits")
@@ -110,7 +111,7 @@ def plot_color(fig, ax, x, y, z, file_name):
     plt.tight_layout()
 
     if file_name:
-        plt.savefig("{}/{}.pdf".format(fig_folder, file_name))
+        plt.savefig("{}/{}.pdf".format(folder, file_name))
 
     plt.show()
 
