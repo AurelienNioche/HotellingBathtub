@@ -1,5 +1,8 @@
 from pylab import np, plt
+import os
 
+folder = "../../doc/draft/fig/a_priori"  # "figures"
+os.makedirs(folder, exist_ok=True)
 
 n_positions = 100
 mode = "fixed_radius"  # fixed_proportion, fixed_radius
@@ -83,7 +86,7 @@ def main():
     ax.set_ylabel("Proportion of beach seen")
     ax.set_xlabel("Position")
 
-    plt.savefig("../data/figures/a_priori_x_vs_r_{}.pdf".format(mode))
+    plt.savefig("{}/a_priori_x_vs_r_{}.pdf".format(folder, mode))
     plt.show()
 
 

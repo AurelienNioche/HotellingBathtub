@@ -1,7 +1,10 @@
-import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patheffects as path_effects
+import os
+
+folder = "../../doc/draft/fig/a_priori"  # "figures"
+os.makedirs(folder, exist_ok=True)
+
 
 plt.rc("ytick", labelsize="small")
 plt.rc("xtick", labelsize="small")
@@ -10,9 +13,9 @@ plt.rc("xtick", labelsize="small")
 # -----------------------------------------------------------------------------
 seed       = 123
 np.random.seed(seed)
-n_position = 100 # Number of discrete position over [0,1]
-n_client   = 100 # Number of clients
-n_firm     = 2  # Number of firms
+n_position = 100  # Number of discrete position over [0,1]
+n_client   = 100  # Number of clients
+n_firm     = 2    # Number of firms
 
 # Uniform position
 P = np.linspace(0, 1, n_client, endpoint=True)
@@ -60,5 +63,5 @@ ax.set_ylim([22, 100.25])
 ax.set_ylabel("Targetable clients")
 ax.set_xlabel("Position")
 
-plt.savefig("figures/clients_visibility.pdf")
+plt.savefig("{}/clients_visibility.pdf".format(folder))
 plt.show()
