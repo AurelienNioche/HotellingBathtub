@@ -20,14 +20,11 @@ def eeg_like(file_name, folder=None):
     t_max = 250  # bkp.parameters.t_max
 
     t = np.arange(1, t_max)
-    print(len(t))
 
     position_A = pst[1:t_max, 0]
     position_B = pst[1:t_max, 1]
     price_A = prc[1:t_max, 0]
     price_B = prc[1:t_max, 0]
-
-    print(len(position_A))
 
     color_A = "orange"
     color_B = "blue"
