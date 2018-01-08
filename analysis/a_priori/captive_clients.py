@@ -72,7 +72,7 @@ for rr in relative_radius:
 
     # Visualization
     # -----------------------------------------------------------------------------
-    # fig = plt.figure(figsize=(7, 7))
+    fig = plt.figure(figsize=(7.5, 7))
 
     # Captive clients (A)
     ax = plt.subplot()
@@ -84,7 +84,11 @@ for rr in relative_radius:
     norm = colors.BoundaryNorm(bounds, cmap.N)
 
     im = ax.imshow(C1, vmin=0, vmax=n_client/2, origin='lower', extent=[0, 100, 0, 100], norm=norm)
-    cb = plt.colorbar(im, norm=norm, ticks=(0, 25, 50))
+
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="4%", pad=0.2)
+    cb = plt.colorbar(im, norm=norm, ticks=(0, 25, 50), cax=cax, label="Number of captive clients")
 
     n_levels = int(C1.max()*16/(n_client/2))
     ct = ax.contourf(C1, n_levels, origin='lower', vmax=n_client / 2)
@@ -95,6 +99,8 @@ for rr in relative_radius:
     ax.set_ylabel("Position B", labelpad=10)
 
     ax.set_title("A captive clients ($r={:.2f}$)".format(rr))
+
+    plt.tight_layout()
 
     plt.savefig("{}/captive_clients_r_{}.pdf".format(folder, int(rr*100)))
     plt.show()
