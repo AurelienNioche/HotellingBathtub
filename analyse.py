@@ -3,7 +3,7 @@ import analysis
 
 def main():
 
-    fig_folder = "doc/fig/results"
+    fig_folder = "doc/draft/fig/results"
 
     # Individual results
     file_names = (
@@ -19,7 +19,8 @@ def main():
         # analysis.separate.ascii_viewer(file_name)
 
     # Results for pool
-    file_name = "2017-12-20_16-47-16_824170"  # max price 50
+    file_name = "2017-12-22_16-14-02_224254"
+    # file_name = "2017-12-20_16-47-16_824170"  # max price 50
     analysis.pool.distance_over_fov(file_name, folder=fig_folder)
 
 

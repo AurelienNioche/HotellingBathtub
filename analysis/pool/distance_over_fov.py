@@ -7,7 +7,7 @@ import backup
 span_ratio = 0.33
 
 
-def distance_over_fov(file_name, bw=False, show_error_bars=False, show_fitting_curve=False, folder=None):
+def distance_over_fov(file_name, show_random=True, bw=False, show_error_bars=False, show_fitting_curve=False, folder=None):
 
     if folder is None:
         folder = "data/figures"
@@ -54,8 +54,17 @@ def distance_over_fov(file_name, bw=False, show_error_bars=False, show_fitting_c
     fig = plt.figure(figsize=(10, 6))
     ax = plt.subplot()
 
+    ax.set_xlim(-0.01, 1.01)
+    ax.set_ylim(-0.01, 0.51)
+
+    ax.set_xticks(np.arange(0, 1.1, 0.25))
+    ax.set_yticks(np.arange(0, 0.51, 0.1))
+
     add_title_and_labels(ax)
     add_comment_with_file_name(fig=fig, file_name=file_name)
+
+    if show_random:
+        ax.axhline(0.33, color='0.5', linewidth=0.5, linestyle="--", zorder=-10)
 
     if show_error_bars:
         ax.errorbar(x, y, yerr=y_err, fmt='.', alpha=0.1)
