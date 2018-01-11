@@ -3,9 +3,6 @@ from pylab import plt
 
 import backup
 
-fig_folder = "data/figures"
-os.makedirs(fig_folder, exist_ok=True)
-
 
 def pos_firmA_over_pos_firmB(file_name, folder=None):
 

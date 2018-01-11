@@ -3,11 +3,20 @@ import os
 import tqdm
 
 
-fig_folder = "data/figures"
-os.makedirs(fig_folder, exist_ok=True)
+def analyse_profits(pool_backup, file_name="", folder=None):
 
+    """
+    Expected running_mode is 'discrete'
+    :param pool_backup:
+    :param file_name:
+    :param folder:
+    :return:
+    """
 
-def analyse_profits(pool_backup, file_name=""):
+    if folder is None:
+        folder = "data/figures"
+
+    os.makedirs(folder, exist_ok=True)
 
     def f_cond(xx):
         if xx < 0.25:
@@ -29,6 +38,8 @@ def analyse_profits(pool_backup, file_name=""):
 
     parameters = pool_backup.parameters
     backups = pool_backup.backups
+
+    assert backups[0].running_mode == "discrete", "Expected running_mode is 'discrete'"
 
     profit_max = parameters.n_positions * parameters.n_prices * parameters.unit_value
 
@@ -59,7 +70,6 @@ def analyse_profits(pool_backup, file_name=""):
     plt.tight_layout()
 
     if file_name:
-        plt.savefig("{}/{}_mean_profit_{}_cat.pdf".format(fig_folder, file_name, n_pools))
+        plt.savefig("{}/{}_mean_profit_{}_cat.pdf".format(folder, file_name, n_pools))
 
     plt.show()
-

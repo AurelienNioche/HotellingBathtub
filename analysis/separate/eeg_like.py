@@ -24,7 +24,7 @@ def eeg_like(file_name, folder=None):
     position_A = pst[1:t_max, 0]
     position_B = pst[1:t_max, 1]
     price_A = prc[1:t_max, 0]
-    price_B = prc[1:t_max, 0]
+    price_B = prc[1:t_max, 1]
 
     color_A = "orange"
     color_B = "blue"
