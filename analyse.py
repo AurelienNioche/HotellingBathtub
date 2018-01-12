@@ -1,4 +1,5 @@
 import analysis
+import os
 
 
 def main():
@@ -22,13 +23,12 @@ def main():
     file_name = "2017-12-22_16-14-02_224254"
     # file_name = "2017-12-20_16-47-16_824170"  # max price 50
     analysis.pool.distance_over_fov(file_name, folder=fig_folder)
-    analysis.pool.profits_over_fov(file_name=file_name, folder=fig_folder, separate_A_and_B=False)
+    analysis.pool.profits_over_fov(file_name=file_name, folder=fig_folder, separate_A_and_B=True, fitting_curve=False)
     analysis.pool.profits_over_distance(file_name=file_name, folder=fig_folder, separate_A_and_B=False)
 
 
 def optimal_against_random():
 
-    import os
     fig_folder = os.path.expanduser("~/Desktop/")
     #
     # file_name = "2018-01-11_11-57-28_313189"
@@ -38,6 +38,13 @@ def optimal_against_random():
 
     file_name = "2018-01-11_13-43-31_963302"
 #    analysis.pool.distance_over_fov(file_name=file_name, folder=fig_folder)
+    analysis.pool.profits_over_fov(file_name=file_name, folder=fig_folder)
+
+
+def random_against_random():
+
+    fig_folder = os.path.expanduser("~/Desktop/")
+    file_name = "2018-01-12_11-20-58_972991"
     analysis.pool.profits_over_fov(file_name=file_name, folder=fig_folder)
 
 

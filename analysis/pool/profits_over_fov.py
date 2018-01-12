@@ -5,7 +5,7 @@ import backup
 
 
 def profits_over_fov(
-        file_name, folder=None, separate_A_and_B=True):
+        file_name, folder=None, separate_A_and_B=True, fitting_curve=True):
 
     if folder is None:
         folder = "data/figures"
@@ -49,12 +49,14 @@ def profits_over_fov(
     if separate_A_and_B is True:
         ax.scatter(x, y[0], zorder=10, alpha=0.25, label="Firm A")
         ax.scatter(x, y[1], zorder=10, alpha=0.25, label="Firm B")
-        add_fitting_curve(ax=ax, x=x, y=y[0])
-        add_fitting_curve(ax=ax, x=x, y=y[1])
         plt.legend()
 
     else:
         ax.scatter(x, np.mean(y, axis=0), zorder=10, alpha=0.25, color="black")
+
+    if fitting_curve is True:
+        add_fitting_curve(ax=ax, x=x, y=y[0])
+        add_fitting_curve(ax=ax, x=x, y=y[1])
 
     plt.tight_layout()
 
