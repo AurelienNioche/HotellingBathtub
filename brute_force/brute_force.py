@@ -1,7 +1,6 @@
 import numpy as np
 from parameters import Parameters
 import itertools
-from tqdm import tqdm
 
 
 class BruteForce:
@@ -9,7 +8,7 @@ class BruteForce:
     def __init__(self):
 
         self.r = 0.5
-        self.parameters = Parameters(n_positions=100, n_prices=10, t_max=100)
+        self.parameters = Parameters(n_positions=20, n_prices=10, t_max=10)
 
         self.strategies = np.array(
             list(itertools.product(range(self.parameters.n_positions), range(self.parameters.n_prices))),
@@ -126,8 +125,8 @@ class BruteForce:
 
         for i, j in itertools.product(range(self.n_strategies), repeat=2):
 
-            positions = self.strategies[i, 0], self.strategies[j, 0]
-            prices = self.strategies[i, 1], self.strategies[j, 1]
+            positions = np.array([self.strategies[i, 0], self.strategies[j, 0]])
+            prices = np.array([self.strategies[i, 1], self.strategies[j, 1]])
 
             n_customers[:] = self.n_customers[positions[0], positions[1], :2]
 
@@ -145,7 +144,7 @@ class BruteForce:
                 else:
                     n_customers[int(prices[1] < prices[0])] += to_share
 
-            z[i, j, :] = n_customers * prices
+            z[i, j, :] = n_customers * (prices + 1)  # Prices are idx of prices
 
         print("Done!")
 
@@ -218,24 +217,96 @@ class BruteForce:
     def run(self):
 
         print("*" * 10 + "\n")
-
+        print("'A' against 'B'")
         cumulative_profits = np.zeros(2, dtype=int)
 
-        b_move = np.random.randint(self.n_strategies)
+        b_initial_move = np.random.randint(self.n_strategies)
+        b_move = b_initial_move
 
         for t in range(self.parameters.t_max):
-            a_move = self.firm_a_reply[b_move]  # idx, t0, player
 
+            print("Turn: {}\n".format(t))
+
+            a_move = self.firm_a_reply[b_move]  # idx, t0, player
             profits_firm_a_active = self.profits[a_move, b_move]
 
-            b_move = self.firm_b_reply(a_move, b_precedent_move=b_move)
+            print("Firm A active")
+            print("A: position = {}; price = {}; profits={}".format(
+                self.strategies[a_move, 0], self.strategies[a_move, 1], profits_firm_a_active[0])
+            )
+            print("B: position = {}; price = {}; profits={}".format(
+                self.strategies[b_move, 0], self.strategies[b_move, 1], profits_firm_a_active[1])
+            )
+            print("Repartition clients: {}"
+                  .format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
+            print()
 
+            b_move = self.firm_b_reply(a_move, b_precedent_move=b_move)
             profits_firm_b_active = self.profits[a_move, b_move]
+
+            print("Firm B active")
+            print("A: position = {}; price = {}; profits={}".format(
+                self.strategies[a_move, 0], self.strategies[a_move, 1], profits_firm_b_active[0])
+            )
+            print("B: position = {}; price = {}; profits={}".format(
+                self.strategies[b_move, 0], self.strategies[b_move, 1], profits_firm_b_active[1])
+            )
+            print("Repartition clients: {}".format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
+            print()
 
             pr = profits_firm_a_active + profits_firm_b_active
             cumulative_profits[:] = cumulative_profits[:] + pr
 
-            print("Profits: {} %%{}%%".format(pr, cumulative_profits))
+            print("Total profits for t: {} %% cumulative {} %%\n"
+                  .format(pr, cumulative_profits))
+
+            print("*" * 10 + "\n")
+
+        print("*" * 10 + "\n")
+        print("*" * 10 + "\n")
+        print("*" * 10 + "\n")
+
+        print("'A' against 'A'")
+        b_move = b_initial_move
+        print(b_move)
+        cumulative_profits[:] = 0
+
+        for t in range(self.parameters.t_max):
+
+            print("Turn: {}".format(t))
+
+            a_move = self.firm_a_reply[b_move]  # idx, t0, player
+            profits_firm_a_active = self.profits[a_move, b_move]
+
+            print("Firm A active")
+            print("A: position = {}; price = {}; profits={}".format(
+                self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_a_active[0])
+            )
+            print("B: position = {}; price = {}; profits={}".format(
+                self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_a_active[1])
+            )
+            print("Clients: {}".format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
+            print()
+
+            b_move = self.firm_a_reply[a_move]
+            profits_firm_b_active = self.profits[a_move, b_move]
+
+            print("Firm B active")
+            print("A: position = {}; price = {}; profits={}".format(
+                self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_b_active[0])
+            )
+            print("B: position = {}; price = {}; profits={}".format(
+                self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_b_active[1])
+            )
+            print("Repartition clients: {}"
+                  .format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
+            print()
+
+            pr = profits_firm_a_active + profits_firm_b_active
+            cumulative_profits[:] = cumulative_profits[:] + pr
+
+            print("Total profits for t: {} %% cumulative {} %%\n"
+                  .format(pr, cumulative_profits))
 
             print("*" * 10 + "\n")
 
