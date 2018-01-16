@@ -1,52 +1,80 @@
 import numpy as np
-from parameters import Parameters
 import itertools
+import math
+
+
+class Parameters:
+
+    def __init__(
+            self, n_positions=2, n_prices=1,
+            t_max=1, r=0.5, horizon=2, unit_value=1, seed=0, name="", init_move_firm_b=0):
+
+        self.init_move_firm_b = init_move_firm_b
+        self.n_positions = n_positions
+        self.n_prices = n_prices
+        self.t_max = t_max
+        self.unit_value = unit_value
+        self.r = r
+        self.horizon = horizon
+        self.seed = seed
+        self.name = name
+
+    def dict(self):
+        return {i: j for i, j in self.__dict__.items() if not i.startswith("__")}
 
 
 class BruteForce:
 
-    def __init__(self):
+    def __init__(self, param):
 
-        self.r = 0.5
-        self.parameters = Parameters(n_positions=20, n_prices=10, t_max=10)
+        np.random.seed(param.seed)
+        
+        self.n_positions = param.n_positions
+        self.n_prices = param.n_prices
+        self.t_max = param.t_max
+        self.r = param.r
+        self.unit_value = param.unit_value
+        self.horizon = param.horizon
 
+        self.init_move_firm_b = param.init_move_firm_b
+        
         self.strategies = np.array(
-            list(itertools.product(range(self.parameters.n_positions), range(self.parameters.n_prices))),
+            list(itertools.product(range(self.n_positions), range(self.n_prices))),
             dtype=int
         )
-        
-        self.horizon = 2
-        
-        self.idx_strategies = np.arange(len(self.strategies))
 
         # Useful n
         self.n_strategies = len(self.strategies)
-        self.n_path = self.n_strategies**self.horizon
+        self.n_moves_anticipated_for_itself = 1 + self.horizon // 2
+        self.n_path = self.n_strategies**self.n_moves_anticipated_for_itself
+
+        self.idx_strategies = np.arange(self.n_strategies)
 
         # Prepare useful arrays
         self.n_customers = self.compute_n_customers()
-        self.firm_a_reply = self.compute_firm_a_replies()
+        self.horizon_0_reply = self.compute_horizon_0_replies()
         self.tree = self.get_tree()
         self.profits = self.compute_profits()
 
-        self.anticipated_moves = np.zeros((self.n_path, self.horizon, 2), dtype=int)
-        self.anticipated_profits = np.zeros((self.n_path, 2), dtype=int)
+        y_size = 1 + int(math.ceil(self.horizon / 2))
+        self.anticipated_moves = np.zeros((self.n_path, y_size, 2), dtype=int)
+        self.anticipated_profits = np.zeros(self.n_path, dtype=int)
 
     def compute_n_customers(self):
 
         print("Compute n customers...",  end=" ", flush=True)
 
-        z = np.zeros((self.parameters.n_positions, self.parameters.n_positions, 3), dtype=int)
+        z = np.zeros((self.n_positions, self.n_positions, 3), dtype=int)
         # Last parameter is idx0: n customers seeing only A,
         #                   idx1: n customers seeing only B,
         #                   idx2: customers seeing A and B,
 
-        field_of_view = np.zeros((self.parameters.n_positions, 2))  # 2: min, max
-        field_of_view[:] = [self.field_of_view(x) for x in range(self.parameters.n_positions)]
+        field_of_view = np.zeros((self.n_positions, 2))  # 2: min, max
+        field_of_view[:] = [self.field_of_view(x) for x in range(self.n_positions)]
 
-        for i, j in itertools.product(range(self.parameters.n_positions), repeat=2):
+        for i, j in itertools.product(range(self.n_positions), repeat=2):
 
-            for x in range(self.parameters.n_positions):
+            for x in range(self.n_positions):
 
                 see_firm_0 = field_of_view[x, 0] <= i <= field_of_view[x, 1]
                 see_firm_1 = field_of_view[x, 0] <= j <= field_of_view[x, 1]
@@ -64,9 +92,9 @@ class BruteForce:
 
         return z
 
-    def compute_firm_a_replies(self):
+    def compute_horizon_0_replies(self):
 
-        print("Compute replies for firm A...", end=" ", flush=True)
+        print("Compute replies for firm with a horizon...", end=" ", flush=True)
 
         z = np.zeros(self.n_strategies, dtype=int)  # 2: position, price
 
@@ -79,11 +107,12 @@ class BruteForce:
 
     def field_of_view(self, x):
 
-        r = int(self.r * self.parameters.n_positions)
+        r = int(self.r * self.n_positions)
 
         field_of_view = [
             max(x - r, 0),
-            min(x + r, self.parameters.n_positions - 1)]
+            min(x + r, self.n_positions - 1)
+        ]
 
         return field_of_view
 
@@ -105,7 +134,7 @@ class BruteForce:
             elif price == opp_price:
                 n_customers += round(to_share / 2)
 
-            exp_profits[i] = (price+1) * n_customers  # Price is in fact price index
+            exp_profits[i] = (price+1) * self.unit_value * n_customers  # Price is in fact price index
 
         max_profits = max(exp_profits)
 
@@ -144,67 +173,95 @@ class BruteForce:
                 else:
                     n_customers[int(prices[1] < prices[0])] += to_share
 
-            z[i, j, :] = n_customers * (prices + 1)  # Prices are idx of prices
+            z[i, j, :] = n_customers * (prices + 1) * self.unit_value  # Prices are idx of prices
 
         print("Done!")
 
         return z
 
     def get_tree(self):
+        
         print("Building the tree...", end=" ", flush=True)
-        z = np.array(list(itertools.product(range(self.n_strategies), repeat=self.horizon)), dtype=int)
+        z = np.array(list(
+            itertools.product(range(self.n_strategies), repeat=self.n_moves_anticipated_for_itself)), dtype=int)
         print("Done!")
+
+        print("Tree:")
+        for i in range(z.shape[0]):
+            print(z[i])
         return z
 
-    def firm_b_reply(self, a_move, b_precedent_move):
+    def compute_anticipated_moves(self, opponent_move, verbose=False):
 
-        self.anticipated_moves[:, 0, 0] = a_move
+        self.anticipated_moves[:, 0, 0] = opponent_move
 
-        print("Filling 'moves' array...", end=" ", flush=True)
+        if verbose:
+            print("Filling 'moves' array...", end=" ", flush=True)
 
-        for t in range(self.horizon):
+        for t in range(self.n_moves_anticipated_for_itself):
+            self.anticipated_moves[:, t, 1] = self.tree[:, t]
+            try:
+                self.anticipated_moves[:, t + 1, 0] = self.horizon_0_reply[self.tree[:, t]]
+            except IndexError:
+                pass
 
-            for i in range(self.n_path):
-                for s in self.tree[i]:
-                    self.anticipated_moves[i, t, 1] = s
+        # self.anticipated_moves[:, -1, 1] = self.tree[:, -1]
 
-                    if (t + 1) < self.horizon:
-                        self.anticipated_moves[i, t + 1, 0] = self.firm_a_reply[s]
+        if verbose:
+            print("Done!")
+            self.print_anticipated_moves()
 
-        print("Done!")
-        print("Filling 'profits' array...", end=" ", flush=True)
+    def compute_anticipated_profits(self, verbose):
+
+        if verbose:
+            print("Filling 'profits' array...", end=" ", flush=True)
 
         for i in range(self.n_path):
 
-            for t in range(self.horizon):
+            n_moves, t = 0, 0
 
-                if t == 0:
-                    profits_firm_a_active = self.profits[
-                        self.anticipated_moves[i, t, 0],
-                        b_precedent_move
-                    ]
+            while True:
 
-                else:
-                    profits_firm_a_active = self.profits[
-                        self.anticipated_moves[i, t, 0],
-                        self.anticipated_moves[i, t-1, 1]
-                    ]
-
-                profits_firm_b_active = self.profits[
+                # Role is active
+                profits = self.profits[
                     self.anticipated_moves[i, t, 0],
                     self.anticipated_moves[i, t, 1]
                 ]
 
-                profits = profits_firm_a_active + profits_firm_b_active
+                self.anticipated_profits[i] += profits[1]
 
-                self.anticipated_profits[i, :] += profits
+                n_moves += 1
 
-        print("Done!\n")
+                if n_moves >= self.horizon:
+                    break
+
+                # Role is passive
+                profits = self.profits[
+                    self.anticipated_moves[i, t + 1, 0],
+                    self.anticipated_moves[i, t, 1]
+                ]
+
+                self.anticipated_profits[i] += profits[1]
+
+                n_moves += 1
+                t += 1
+
+                if n_moves >= self.horizon:
+                    break
+
+        if verbose:
+            print("Done!\n")
         # print("Results:\n")
 
-        max_profits = max(self.anticipated_profits[:, 1])
+    def horizon_x_reply(self, opponent_move, verbose=False):
 
-        idx = np.flatnonzero(self.anticipated_profits[:, 1] == max_profits)
+        self.compute_anticipated_moves(opponent_move, verbose)
+        self.compute_anticipated_profits(verbose)
+
+        max_profits = max(self.anticipated_profits)
+
+        # noinspection PyTypeChecker
+        idx = np.flatnonzero(self.anticipated_profits[:] == max_profits)
 
         best_i = np.random.choice(idx)
 
@@ -214,106 +271,123 @@ class BruteForce:
 
         return self.anticipated_moves[best_i, 0, 1]
 
-    def run(self):
+    def print_moves(self, active, a_move, b_move, profits):
 
-        print("*" * 10 + "\n")
-        print("'A' against 'B'")
+        print("Firm {} active".format(active))
+        print("A: position = {}; price = {}; profits={}".format(
+            self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits[0])
+        )
+        print("B: position = {}; price = {}; profits={}".format(
+            self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits[1])
+        )
+        print(
+            "Repartition clients: {}".format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
+        print()
+
+    def print_anticipated_moves(self):
+
+        print("\nAnticipated moves are:")
+
+        for i in range(self.anticipated_moves.shape[0]):
+            print("#{}".format(i), end=" ")
+            print([(self.anticipated_moves[i, t, 0], self.anticipated_moves[i, t, 1]) for t in
+                   range(self.anticipated_moves.shape[1])], end=" ")
+            print("## [(opponent, itself) at t, (opponent, itself) at t+1, ...")
+        print("\n")
+
+    def run_horizon_0_against_horizon_x(self, verbose=False):
+
+        if verbose:
+            print("*" * 10 + "\n")
+            print("'Horizon 0' against 'Horizon {}'".format(self.horizon))
+            print("*" * 10 + "\n")
+            print("N strategies", self.n_strategies)
+            print("N path", self.n_path)
+            print("N moves anticipated for itself", self.n_moves_anticipated_for_itself)
+            print("*" * 10 + "\n")
+
         cumulative_profits = np.zeros(2, dtype=int)
 
-        b_initial_move = np.random.randint(self.n_strategies)
-        b_move = b_initial_move
+        b_move = self.init_move_firm_b
 
-        for t in range(self.parameters.t_max):
+        for t in range(self.t_max):
 
-            print("Turn: {}\n".format(t))
+            if verbose:
+                print("Turn: {}\n".format(t))
 
-            a_move = self.firm_a_reply[b_move]  # idx, t0, player
+            # A is active
+            a_move = self.horizon_0_reply[b_move]  # idx, t0, player
             profits_firm_a_active = self.profits[a_move, b_move]
 
-            print("Firm A active")
-            print("A: position = {}; price = {}; profits={}".format(
-                self.strategies[a_move, 0], self.strategies[a_move, 1], profits_firm_a_active[0])
-            )
-            print("B: position = {}; price = {}; profits={}".format(
-                self.strategies[b_move, 0], self.strategies[b_move, 1], profits_firm_a_active[1])
-            )
-            print("Repartition clients: {}"
-                  .format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
-            print()
+            if verbose:
+                self.print_moves(active="A", a_move=a_move, b_move=b_move, profits=profits_firm_a_active)
 
-            b_move = self.firm_b_reply(a_move, b_precedent_move=b_move)
+            b_move = self.horizon_x_reply(a_move, verbose)
             profits_firm_b_active = self.profits[a_move, b_move]
 
-            print("Firm B active")
-            print("A: position = {}; price = {}; profits={}".format(
-                self.strategies[a_move, 0], self.strategies[a_move, 1], profits_firm_b_active[0])
-            )
-            print("B: position = {}; price = {}; profits={}".format(
-                self.strategies[b_move, 0], self.strategies[b_move, 1], profits_firm_b_active[1])
-            )
-            print("Repartition clients: {}".format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
-            print()
+            if verbose:
+                self.print_moves(active="B", a_move=a_move, b_move=b_move, profits=profits_firm_b_active)
 
             pr = profits_firm_a_active + profits_firm_b_active
             cumulative_profits[:] = cumulative_profits[:] + pr
 
-            print("Total profits for t: {} %% cumulative {} %%\n"
-                  .format(pr, cumulative_profits))
+            if verbose:
+                print("Total profits for t: {} %% cumulative {} %%\n"
+                      .format(pr, cumulative_profits))
 
-            print("*" * 10 + "\n")
+                print("*" * 10 + "\n")
 
-        print("*" * 10 + "\n")
-        print("*" * 10 + "\n")
-        print("*" * 10 + "\n")
+        # print("'A' against 'A'")
+        # b_move = b_initial_move
+        # print(b_move)
+        # cumulative_profits[:] = 0
 
-        print("'A' against 'A'")
-        b_move = b_initial_move
-        print(b_move)
-        cumulative_profits[:] = 0
-
-        for t in range(self.parameters.t_max):
-
-            print("Turn: {}".format(t))
-
-            a_move = self.firm_a_reply[b_move]  # idx, t0, player
-            profits_firm_a_active = self.profits[a_move, b_move]
-
-            print("Firm A active")
-            print("A: position = {}; price = {}; profits={}".format(
-                self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_a_active[0])
-            )
-            print("B: position = {}; price = {}; profits={}".format(
-                self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_a_active[1])
-            )
-            print("Clients: {}".format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
-            print()
-
-            b_move = self.firm_a_reply[a_move]
-            profits_firm_b_active = self.profits[a_move, b_move]
-
-            print("Firm B active")
-            print("A: position = {}; price = {}; profits={}".format(
-                self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_b_active[0])
-            )
-            print("B: position = {}; price = {}; profits={}".format(
-                self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_b_active[1])
-            )
-            print("Repartition clients: {}"
-                  .format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
-            print()
-
-            pr = profits_firm_a_active + profits_firm_b_active
-            cumulative_profits[:] = cumulative_profits[:] + pr
-
-            print("Total profits for t: {} %% cumulative {} %%\n"
-                  .format(pr, cumulative_profits))
-
-            print("*" * 10 + "\n")
+        # for t in range(self.t_max):
+        #
+        #     print("Turn: {}".format(t))
+        #
+        #     a_move = self.firm_a_reply[b_move]  # idx, t0, player
+        #     profits_firm_a_active = self.profits[a_move, b_move]
+        #
+        #     print("Firm A active")
+        #     print("A: position = {}; price = {}; profits={}".format(
+        #         self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_a_active[0])
+        #     )
+        #     print("B: position = {}; price = {}; profits={}".format(
+        #         self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_a_active[1])
+        #     )
+        #     print("Clients: {}".format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
+        #     print()
+        #
+        #     b_move = self.firm_a_reply[a_move]
+        #     profits_firm_b_active = self.profits[a_move, b_move]
+        #
+        #     print("Firm B active")
+        #     print("A: position = {}; price = {}; profits={}".format(
+        #         self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_b_active[0])
+        #     )
+        #     print("B: position = {}; price = {}; profits={}".format(
+        #         self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_b_active[1])
+        #     )
+        #     print("Repartition clients: {}"
+        #           .format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
+        #     print()
+        #
+        #     pr = profits_firm_a_active + profits_firm_b_active
+        #     cumulative_profits[:] = cumulative_profits[:] + pr
+        #
+        #     print("Total profits for t: {} %% cumulative {} %%\n"
+        #           .format(pr, cumulative_profits))
+        #
+        #     print("*" * 10 + "\n")
 
 
 def main():
-    b = BruteForce()
-    b.run()
+
+    param = Parameters(n_positions=20, n_prices=10, t_max=10, r=0.5, horizon=2, init_move_firm_b=0)
+
+    b = BruteForce(param)
+    b.run_horizon_0_against_horizon_x(verbose=True)
 
 
 if __name__ == "__main__":
