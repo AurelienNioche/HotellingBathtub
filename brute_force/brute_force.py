@@ -306,80 +306,33 @@ class BruteForce:
             print("N moves anticipated for itself", self.n_moves_anticipated_for_itself)
             print("*" * 10 + "\n")
 
-        cumulative_profits = np.zeros(2, dtype=int)
+        # For recording
+        positions = np.zeros((self.t_max, 2))
+        prices = np.zeros((self.t_max, 2))
+        profits = np.zeros((self.t_max, 2))
 
         b_move = self.init_move_firm_b
+        a_active = True
 
         for t in range(self.t_max):
 
-            if verbose:
-                print("Turn: {}\n".format(t))
-
             # A is active
-            a_move = self.horizon_0_reply[b_move]  # idx, t0, player
-            profits_firm_a_active = self.profits[a_move, b_move]
+            if a_active:
+                a_move = self.horizon_0_reply[b_move]  # idx, t0, player
+
+            else:
+                b_move = self.horizon_x_reply(a_move, verbose)
+
+            profits[t, :] = self.profits[a_move, b_move]
+            positions[t, :] = self.strategies[a_move, 0], self.strategies[b_move, 0]
+            prices[t, :] = self.strategies[a_move, 1], self.strategies[b_move, 1]
 
             if verbose:
-                self.print_moves(active="A", a_move=a_move, b_move=b_move, profits=profits_firm_a_active)
+                self.print_moves(active=["B", "A"][a_active], a_move=a_move, b_move=b_move, profits=profits[t, :])
 
-            b_move = self.horizon_x_reply(a_move, verbose)
-            profits_firm_b_active = self.profits[a_move, b_move]
+            a_active = not a_active
 
-            if verbose:
-                self.print_moves(active="B", a_move=a_move, b_move=b_move, profits=profits_firm_b_active)
-
-            pr = profits_firm_a_active + profits_firm_b_active
-            cumulative_profits[:] = cumulative_profits[:] + pr
-
-            if verbose:
-                print("Total profits for t: {} %% cumulative {} %%\n"
-                      .format(pr, cumulative_profits))
-
-                print("*" * 10 + "\n")
-
-        # print("'A' against 'A'")
-        # b_move = b_initial_move
-        # print(b_move)
-        # cumulative_profits[:] = 0
-
-        # for t in range(self.t_max):
-        #
-        #     print("Turn: {}".format(t))
-        #
-        #     a_move = self.firm_a_reply[b_move]  # idx, t0, player
-        #     profits_firm_a_active = self.profits[a_move, b_move]
-        #
-        #     print("Firm A active")
-        #     print("A: position = {}; price = {}; profits={}".format(
-        #         self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_a_active[0])
-        #     )
-        #     print("B: position = {}; price = {}; profits={}".format(
-        #         self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_a_active[1])
-        #     )
-        #     print("Clients: {}".format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
-        #     print()
-        #
-        #     b_move = self.firm_a_reply[a_move]
-        #     profits_firm_b_active = self.profits[a_move, b_move]
-        #
-        #     print("Firm B active")
-        #     print("A: position = {}; price = {}; profits={}".format(
-        #         self.strategies[a_move, 0], self.strategies[a_move, 1] + 1, profits_firm_b_active[0])
-        #     )
-        #     print("B: position = {}; price = {}; profits={}".format(
-        #         self.strategies[b_move, 0], self.strategies[b_move, 1] + 1, profits_firm_b_active[1])
-        #     )
-        #     print("Repartition clients: {}"
-        #           .format(self.n_customers[self.strategies[a_move, 0], self.strategies[b_move, 0]]))
-        #     print()
-        #
-        #     pr = profits_firm_a_active + profits_firm_b_active
-        #     cumulative_profits[:] = cumulative_profits[:] + pr
-        #
-        #     print("Total profits for t: {} %% cumulative {} %%\n"
-        #           .format(pr, cumulative_profits))
-        #
-        #     print("*" * 10 + "\n")
+        return positions, prices, profits
 
 
 def main():
