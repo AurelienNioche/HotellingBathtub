@@ -1,1 +1,1 @@
-from . backup import RunBackup, PoolBackup
+from . backup import RunBackup, PoolBackup, Backup

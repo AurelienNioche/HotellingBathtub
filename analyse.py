@@ -44,10 +44,18 @@ def optimal_against_random():
 def random_against_random():
 
     fig_folder = os.path.expanduser("~/Desktop/")
-    file_name = "2018-01-12_11-20-58_972991"
+    file_name = "2018-01-22_16-01-28_879601"
     analysis.pool.profits_over_fov(file_name=file_name, folder=fig_folder)
+
+
+def horizon():
+
+    fig_folder = os.path.expanduser("~/Desktop/")
+    data_folder = "brute_force/data/pickle/"
+    file_name = "2018-01-22_17-56-31_026044"
+    analysis.pool.distance_over_fov(file_name=file_name, fig_folder=fig_folder, data_folder=data_folder)
 
 
 if __name__ == '__main__':
 
-    main()
+    horizon()

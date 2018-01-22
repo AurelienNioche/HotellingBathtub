@@ -7,19 +7,27 @@ import backup
 span_ratio = 0.33
 
 
-def distance_over_fov(file_name, show_random=True, bw=False, show_error_bars=False, show_fitting_curve=False, folder=None):
+def distance_over_fov(file_name, show_random=True, bw=False, show_error_bars=False, show_fitting_curve=False,
+                      fig_folder=None, data_folder=None):
 
-    if folder is None:
-        folder = "data/figures"
+    if fig_folder is None:
+        fig_folder = "data/figures"
 
-    os.makedirs(folder, exist_ok=True)
+    os.makedirs(fig_folder, exist_ok=True)
 
-    pool_backup = backup.PoolBackup.load(file_name=file_name)
+    pool_backup = backup.PoolBackup.load(folder_name=data_folder, file_name=file_name)
 
     parameters = pool_backup.parameters
     backups = pool_backup.backups
 
     n_simulations = parameters.n_simulations
+
+    n_positions = parameters.n_positions
+    n_prices = parameters.n_prices
+    unit_value = parameters.unit_value
+
+    # Compute profit max
+    profit_max = n_positions * n_prices * unit_value
 
     # Containers
     x = np.zeros(n_simulations)
@@ -32,13 +40,16 @@ def distance_over_fov(file_name, show_random=True, bw=False, show_error_bars=Fal
 
     for i, b in enumerate(backups):
 
-        # Save the parameter that affected the customers field of view
-        x[i] = b.field_of_view / 2
+        try:
+            # Save the parameter that affected the customers field of view
+            x[i] = b.field_of_view / 2
+        except AttributeError:
+            x[i] = b.parameters.r
 
         # Compute the mean distance between the two firms
         data = np.absolute(
                 b.positions[-span:, 0] -
-                b.positions[-span:, 1]) / parameters.n_positions
+                b.positions[-span:, 1]) / n_positions
 
         spacing = np.mean(data)
         spacing_std = np.std(data)
@@ -47,7 +58,6 @@ def distance_over_fov(file_name, show_random=True, bw=False, show_error_bars=Fal
         y_err[i] = spacing_std
 
         # Get mean profits
-        profit_max = parameters.n_positions * parameters.n_prices * parameters.unit_value
         z[i] = np.mean(b.profits[-span:, :]) / profit_max
 
     # Plot this
@@ -55,7 +65,8 @@ def distance_over_fov(file_name, show_random=True, bw=False, show_error_bars=Fal
     ax = plt.subplot()
 
     ax.set_xlim(-0.01, 1.01)
-    ax.set_ylim(-0.01, 0.51)
+    if max(y) < 0.5:
+        ax.set_ylim(-0.01, 0.51)
 
     ax.set_xticks(np.arange(0, 1.1, 0.25))
     ax.set_yticks(np.arange(0, 0.51, 0.1))
@@ -72,14 +83,14 @@ def distance_over_fov(file_name, show_random=True, bw=False, show_error_bars=Fal
     if show_fitting_curve:
         add_fitting_curve(ax=ax, x=x, y=y)
 
-    if parameters.running_mode == "discrete":
+    if hasattr(parameters, 'running_mode') and parameters.running_mode == "discrete":
         boxplot(pool_backup=pool_backup, ax=ax, y=y)
 
     if bw:
-        plot_bw(ax=ax, x=x, y=y, file_name=file_name, folder=folder)
+        plot_bw(ax=ax, x=x, y=y, file_name=file_name, fig_folder=fig_folder)
 
     else:
-        plot_color(fig=fig, ax=ax, x=x, y=y, z=z, file_name=file_name, folder=folder)
+        plot_color(fig=fig, ax=ax, x=x, y=y, z=z, file_name=file_name, fig_folder=fig_folder)
 
 
 def boxplot(pool_backup, ax, y):
@@ -100,19 +111,19 @@ def boxplot(pool_backup, ax, y):
             b.set_alpha(0.5)
 
 
-def plot_bw(ax, x, y, file_name, folder):
+def plot_bw(ax, x, y, file_name, fig_folder):
 
     ax.scatter(x, y, facecolor="black", edgecolor='none', s=25, alpha=0.15)
 
     plt.tight_layout()
 
     if file_name:
-        plt.savefig("{}/{}_gray.pdf".format(folder, file_name))
+        plt.savefig("{}/{}_gray.pdf".format(fig_folder, file_name))
 
     plt.show()
 
 
-def plot_color(fig, ax, x, y, z, file_name, folder):
+def plot_color(fig, ax, x, y, z, file_name, fig_folder):
 
     abc = ax.scatter(x, y, c=z, zorder=10, alpha=0.25)
     fig.colorbar(abc, label="Profits")
@@ -120,7 +131,7 @@ def plot_color(fig, ax, x, y, z, file_name, folder):
     plt.tight_layout()
 
     if file_name:
-        plt.savefig("{}/{}.pdf".format(folder, file_name))
+        plt.savefig("{}/{}.pdf".format(fig_folder, file_name))
 
     plt.show()
 

@@ -36,9 +36,12 @@ class Backup:
         return file_name
 
     @classmethod
-    def load(cls, file_name):
+    def load(cls, file_name, folder_name):
 
-        with open("{}/{}.p".format(cls.pickle_folder, file_name), "rb") as f:
+        if folder_name is None:
+            folder_name = cls.pickle_folder
+
+        with open("{}/{}.p".format(folder_name, file_name), "rb") as f:
             return pickle.load(f)
 
 
