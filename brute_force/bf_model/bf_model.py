@@ -101,14 +101,17 @@ class Model:
 
         # Prepare useful arrays
         self.n_customers = self.compute_n_customers()
+
         self.profits = self.compute_profits()
         self.horizon_0_reply = self.compute_horizon_0_replies()
 
-        self.tree = self.get_tree()
+        if self.mode != Mode.h0_against_h0:
 
-        y_size = 1 + int(math.ceil(self.horizon / 2))
-        self.anticipated_moves = np.ones((self.n_path, y_size, 2), dtype=int) * -1
-        self.anticipated_profits = np.ones(self.n_path, dtype=int) * -1
+            self.tree = self.get_tree()
+
+            y_size = 1 + int(math.ceil(self.horizon / 2))
+            self.anticipated_moves = np.ones((self.n_path, y_size, 2), dtype=int) * -1
+            self.anticipated_profits = np.ones(self.n_path, dtype=int) * -1
 
     def compute_n_customers(self):
 
@@ -153,34 +156,63 @@ class Model:
 
         z = np.zeros((self.n_strategies, self.n_strategies, 2), dtype=int)
 
-        n_customers = np.zeros(2, dtype=int)
-
         for i, j in itertools.product(range(self.n_strategies), repeat=2):
 
-            positions = np.array([self.strategies[i, 0], self.strategies[j, 0]])
-            prices = np.array([self.strategies[i, 1], self.strategies[j, 1]])
+            z[i, j, :] = self.profits_given_position_and_price(i, j)
 
-            n_customers[:] = self.n_customers[positions[0], positions[1], :2]
+        return z
+
+    def profits_given_position_and_price(self, move0, move1):
+
+        pos0, price0 = self.strategies[move0, :]
+        pos1, price1 = self.strategies[move1, :]
+
+        n_customers = np.zeros(2)
+        n_customers[:] = self.n_customers[pos0, pos1, :2]
+
+        to_share = self.n_customers[pos0, pos1, 2]
+
+        if to_share > 0:
+
+            if price0 == price1:
+                n_customers[:] += to_share / 2
+
+            else:
+                n_customers[int(price1 < price0)] += to_share
+
+        return n_customers * (np.array([price0, price1]) + 1) * self.unit_value  # Prices are idx of prices
+
+    def profit_given_opp_move(self, opponent_move):
+
+        z = np.zeros(self.n_strategies)
+
+        for i in range(self.n_strategies):
+
+            positions = np.array([self.strategies[i, 0], self.strategies[opponent_move, 0]])
+            prices = np.array([self.strategies[i, 1], self.strategies[opponent_move, 1]])
+
+            n_customers = self.n_customers[positions[0], positions[1], 0]
 
             to_share = self.n_customers[positions[0], positions[1], 2]
 
             if to_share > 0:
 
                 if prices[0] == prices[1]:
-                    n_customers[:] += to_share
+                    n_customers += to_share / 2
 
-                else:
-                    n_customers[int(prices[1] < prices[0])] += to_share * 2
+                elif prices[0] < prices[1]:
+                    n_customers += to_share
 
-            z[i, j, :] = n_customers * (prices + 1) * self.unit_value  # Prices are idx of prices
+            z[i] = n_customers * (prices[0] + 1) * self.unit_value
 
         return z
 
-    def optimal_move(self, opp_strategy):
+    def optimal_move(self, opp_move):
 
         exp_profits = np.zeros(self.n_strategies)
 
-        exp_profits[:] = self.profits[:, opp_strategy, 0]
+        exp_profits[:] = self.profit_given_opp_move(opp_move)
+            # self.profits[:, opp_strategy, 0]   # self.get_profits(opp_strategy)  # self.profits[:, opp_strategy, 0]
 
         max_profits = max(exp_profits)
 
@@ -286,9 +318,9 @@ class Model:
         if self.mode != Mode.compare_profits:
 
             # For recording
-            positions = np.zeros((self.t_max, 2))
-            prices = np.zeros((self.t_max, 2))
-            profits = np.zeros((self.t_max, 2))
+            positions = np.zeros((self.t_max, 2), dtype=int)
+            prices = np.zeros((self.t_max, 2), dtype=int)
+            profits = np.zeros((self.t_max, 2), dtype=int)
 
         else:
             positions, prices, profits = None, None, None
@@ -313,25 +345,28 @@ class Model:
                     a_move = self.horizon_x_reply(b_move)
                 else:
                     a_move = self.horizon_0_reply[b_move]
-
+                    # a_move = self.optimal_move(b_move)
             else:
                 if b_uses_horizon:
                     b_move = self.horizon_x_reply(a_move)
                 else:
                     b_move = self.horizon_0_reply[a_move]
-
-            prf += self.profits[a_move, b_move, 1]
+                    # b_move = self.optimal_move(a_move)
 
             if self.mode != Mode.compare_profits:
 
-                profits[t, :] = self.profits[a_move, b_move]
                 positions[t, :] = self.strategies[a_move, 0], self.strategies[b_move, 0]
                 prices[t, :] = self.strategies[a_move, 1], self.strategies[b_move, 1]
+                profits[t, :] = self.profits_given_position_and_price(a_move, b_move)  # self.profits[a_move, b_move]
+
+            else:
+                prf += self.profits_given_position_and_price(a_move, b_move)[1]
 
             a_active = not a_active
 
         if self.mode != Mode.compare_profits:
-            return positions, prices, profits / 2
+
+            return positions, prices, profits
             # Divide by 2 because of the trick for repartition of clients in case of equal price
 
         else:

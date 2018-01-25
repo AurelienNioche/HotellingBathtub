@@ -52,7 +52,7 @@ def horizon():
 
     fig_folder = os.path.expanduser("~/Desktop/")
     data_folder = "brute_force/data/pickle/"
-    file_name = "2018-01-24_19-42-51_874453"
+    file_name = "2018-01-25_14-51-50_560508"
     analysis.pool.distance_over_fov(file_name=file_name, fig_folder=fig_folder, data_folder=data_folder)
 
 
