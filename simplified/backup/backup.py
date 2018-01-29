@@ -1,9 +1,7 @@
-import numpy as np
 import os
 import pickle
 import json
-
-from utils import utils
+import datetime
 
 
 class Backup:
@@ -15,11 +13,15 @@ class Backup:
 
         self.parameters = parameters
 
+    @staticmethod
+    def timestamp():
+        return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")
+
     def save(self):
         os.makedirs(self.pickle_folder, exist_ok=True)
         os.makedirs(self.json_folder, exist_ok=True)
 
-        file_name = "{}".format(utils.timestamp())
+        file_name = "{}".format(self.timestamp())
 
         # Save a summary of parameters in json
         with open("{}/{}.json".format(self.json_folder, file_name), "w") as f:
@@ -46,21 +48,12 @@ class Backup:
 
 class RunBackup(Backup):
 
-    def __init__(self, parameters, seed, field_of_view):
+    def __init__(self, parameters, positions, prices, profits):
         super().__init__(parameters)
 
-        self.seed = seed
-        self.field_of_view = field_of_view
-
-        self.positions = np.zeros((parameters.t_max, parameters.n_firms), dtype=int)
-        self.prices = np.zeros((parameters.t_max, parameters.n_firms), dtype=int)
-        self.profits = np.zeros((parameters.t_max, parameters.n_firms))
-
-    def update(self, t, positions, prices, profits):
-
-        self.positions[t] = positions
-        self.prices[t] = prices
-        self.profits[t] = profits
+        self.positions = positions
+        self.prices = prices
+        self.profits = profits
 
 
 class PoolBackup(Backup):
@@ -69,4 +62,3 @@ class PoolBackup(Backup):
         super().__init__(parameters)
 
         self.backups = backups
-

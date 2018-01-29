@@ -172,12 +172,13 @@ def main():
     backups = []
 
     shared_parameters = model.SharedParameters(
-        mode=model.Mode.h1_against_h1,
+        mode=model.Mode.h0_against_h0,
         n_simulations=200,
         t_max=250,
         horizon=1,
-        n_positions=10,
-        n_prices=5
+        n_positions=100,
+        n_prices=50,
+        unit_value=2,
     )
 
     pool_parameters = get_pool_parameters(shared_parameters)
@@ -197,4 +198,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main_profits_comparison()
+    main()
